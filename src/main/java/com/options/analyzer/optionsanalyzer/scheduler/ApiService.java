@@ -57,16 +57,12 @@ public class ApiService {
     @Scheduled(cron = "${api.cron}")
     @Transactional
     public void dataRetrieved() {
-        System.out.println("get the data please");
+        System.out.println("Fetch options chain data ...");
         String symbolUrl = getUrl(SYMBOLS_END_POINT_PATH);
-        //Arrays.asList(restTemplate.getForObject(symbolUrl, Symbols[].class));
-//        List<Symbols> symbols = Arrays.asList(
-//                new Symbols("A", "NYS", "Agilent Technologies Inc.", LocalDate.of(2020, 05, 11), "cd", "IEX_46574843354B2D52", "US",
-//                        Currency.getInstance("USD"), true, "BBG000C2V3D6", "1090872"),
-//                new Symbols("AA", "NYS", "Agilent Technologies Inc.", LocalDate.of(2020, 05, 11), "cd", "IEX_46574843354B2D52", "US",
-//                        Currency.getInstance("USD"), true, "BBG000C2V3D6", "1090872")
-//        );
+        //@TODO should remove these comments lines and read the data from the api
+        //@TODO  for now we are reading the json from the local file system until we have a stable api
 
+        //Arrays.asList(restTemplate.getForObject(symbolUrl, Symbols[].class));
 //        symbols.stream().forEach(symbol -> {
 //                    List<Options> options = getOptions(symbol.getSymbolId());
 //                    options.p
@@ -82,11 +78,7 @@ public class ApiService {
         optionsChainRepository.saveAll(optionsChainsSpy);
         List<OptionsChain> optionsChainsAA = getOptionsChain("AA", "20200520");
         optionsChainRepository.saveAll(optionsChainsAA);
-
-        System.out.println("--------------------------");
-        System.out.println("db Size " + optionsChainRepository.findAll().size());
-        optionsChainRepository.findAll().forEach(chan -> System.out.println(chan));
-        System.out.println("--------------------------");
+        System.out.println("Finish fetching options chain data ...");
     }
 
     private List<Options> getOptions(String symbol) {
