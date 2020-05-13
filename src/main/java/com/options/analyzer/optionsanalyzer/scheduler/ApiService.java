@@ -11,15 +11,12 @@ import com.options.analyzer.optionsanalyzer.model.entity.OptionsChain;
 import com.options.analyzer.optionsanalyzer.repo.OptionsChainRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -61,7 +58,8 @@ public class ApiService {
     @Transactional
     public void dataRetrieved() {
         System.out.println("get the data please");
-        String symbolUrl = getUrl(SYMBOLS_END_POINT_PATH); //Arrays.asList(restTemplate.getForObject(symbolUrl, Symbols[].class));
+        String symbolUrl = getUrl(SYMBOLS_END_POINT_PATH);
+        //Arrays.asList(restTemplate.getForObject(symbolUrl, Symbols[].class));
 //        List<Symbols> symbols = Arrays.asList(
 //                new Symbols("A", "NYS", "Agilent Technologies Inc.", LocalDate.of(2020, 05, 11), "cd", "IEX_46574843354B2D52", "US",
 //                        Currency.getInstance("USD"), true, "BBG000C2V3D6", "1090872"),
@@ -119,7 +117,7 @@ public class ApiService {
             //File file = ResourceUtils.getFile("classpath:options-chain_"+symbol+".json");
 
 
-            String file = Resources.toString(Resources.getResource(ApiService.class,"/json/options-chain_"+symbol+".json"), StandardCharsets.UTF_8);
+            String file = Resources.toString(Resources.getResource(ApiService.class, "/json/options-chain_" + symbol + ".json"), StandardCharsets.UTF_8);
             //File file = new ClassPathResource("/json/options-chain_"+symbol+".json").getFile();
             ObjectMapper mapper = JsonMapper.builder() // or different mapper for other format
                     .addModule(new ParameterNamesModule())

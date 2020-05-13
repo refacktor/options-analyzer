@@ -30,7 +30,7 @@ public class OptionsChainController {
     }
 
     @PostMapping("/getOptionsChain")
-    public ModelAndView getOptionsChain(@ModelAttribute  Symbols symbols, ModelMap model) {
+    public ModelAndView getOptionsChain(@ModelAttribute Symbols symbols, ModelMap model) {
         List<OptionsChain> chains = optionsChainRepository.findBySymbol(symbols.getSymbolId());
         Map<LocalDate, Map<String, List<OptionsChain>>> chainMap = chains.stream().collect(
                 groupingBy(OptionsChain::getExpirationDate, groupingBy(OptionsChain::getSide)));

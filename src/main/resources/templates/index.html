@@ -24,12 +24,22 @@
             margin: 0 auto;
             font-size: 12px;
         }
-
+        /* Just common table stuff. */
         table > tbody > tr > td {
             vertical-align: middle;
             text-align: center;
             font-size: x-small;
+            /*border-collapse: collapse; width: 100%;*/
+            padding: 0px 0px;
+            /*background:#eee;*/
         }
+
+        /*
+        .tableFixHead          { overflow-y: auto; height: 100px; }
+        .tableFixHead thead th { position: sticky; top: 0; }
+        */
+
+
     </style>
 
 
@@ -59,11 +69,17 @@
     <hr class="mt-2 mb-2"/>
     <!-- table data here-->
     <div class="row justify-content-center">
+        <div th:each="entry : ${chainMap}">
         <table>
-            <tr th:each="entry : ${chainMap}">
+            <tr>
+                <td style="background:#eee;"><span class="font-weight-bold">CALLS</span></td>
+                <td style="background:#eee;"><span class="font-weight-bold"  th:text="${entry.key}"/></td>
+                <td style="background:#eee;"><span class="font-weight-bold">PUTS</span></td>
+            </tr>
+            <tr>
                 <td>
                     <div class="table-responsive-sm" style="text-align: center;border:1px">
-                        <span class="font-weight-bold">CALLS</span>
+
                         <table class="table table-sm table-bordered">
                             <thead>
                             <tr>
@@ -86,7 +102,7 @@
                 </td>
                 <td>
                     <div class="table-responsive-sm" style="text-align: center;">
-                        <span class="font-weight-bold"  th:text="${entry.key}"/>
+
                         <table class="table table-sm table-bordered">
                             <thead>
                             <tr>
@@ -104,7 +120,6 @@
                 <td>
                     <div class="table-responsive-sm" style="text-align: center;">
 
-                        <span class="font-weight-bold text-sm-center">PUTS</span>
 
                         <table class="table table-sm table-bordered">
                             <thead>
@@ -128,6 +143,7 @@
                 </td>
             </tr>
         </table>
+        </div>
     </div>
 </div>
 </body>

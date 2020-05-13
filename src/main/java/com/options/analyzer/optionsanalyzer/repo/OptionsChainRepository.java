@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OptionsChainRepository extends JpaRepository<OptionsChain, String> {
     List<OptionsChain> findBySymbol(String symbol);
-    List<OptionsChain> findBySymbolAndSide(String symbol, String side);
+
 }

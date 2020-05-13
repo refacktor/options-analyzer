@@ -2,6 +2,7 @@ package com.options.analyzer.optionsanalyzer.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.math.BigDecimal;
@@ -10,7 +11,6 @@ import java.util.Objects;
 
 @Entity
 public class OptionsChain {
-
     @Id
     private String id;
     private String symbol;
