@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.io.Resources;
 import com.options.analyzer.optionsanalyzer.model.Options;
 import com.options.analyzer.optionsanalyzer.model.entity.OptionsChain;
 import com.options.analyzer.optionsanalyzer.repo.OptionsChainRepository;
@@ -14,11 +15,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +71,7 @@ public class ApiService {
 
 //        symbols.stream().forEach(symbol -> {
 //                    List<Options> options = getOptions(symbol.getSymbolId());
-//                    options.
+//                    options.p
 //                            forEach(option -> {
 //                                        List<OptionsChain> optionsChains = getOptionsChain(symbol.getSymbolId(), option.getExpirationDate());
 //                                        optionsChainRepository.saveAll(optionsChains);
@@ -113,7 +116,11 @@ public class ApiService {
             // "side":"call","type":"equity","volume":0,"openInterest":17,"bid":77.739998,"ask":78.889999,"lastUpdated":"2020-05-07","isAdjusted":false}
 
 
-            File file = new ClassPathResource("/json/options-chain_"+symbol+".json").getFile();
+            //File file = ResourceUtils.getFile("classpath:options-chain_"+symbol+".json");
+
+
+            String file = Resources.toString(Resources.getResource(ApiService.class,"/json/options-chain_"+symbol+".json"), StandardCharsets.UTF_8);
+            //File file = new ClassPathResource("/json/options-chain_"+symbol+".json").getFile();
             ObjectMapper mapper = JsonMapper.builder() // or different mapper for other format
                     .addModule(new ParameterNamesModule())
                     .addModule(new Jdk8Module())
