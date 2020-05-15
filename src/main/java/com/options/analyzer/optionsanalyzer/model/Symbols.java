@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Currency;
 
 public class Symbols {
-	private String symbolId;
+	private String symbol;
 	private String exchange;
 	private String name;
 	private LocalDate date;
@@ -19,10 +19,10 @@ public class Symbols {
 	public Symbols() {
 	}
 
-	public Symbols(String symbolId, String exchange, String name, LocalDate date, String type, String iexId,
+	public Symbols(String symbol, String exchange, String name, LocalDate date, String type, String iexId,
 			String region, Currency currency, boolean isEnabled, String figi, String cik) {
 		super();
-		this.symbolId = symbolId;
+		this.symbol = symbol;
 		this.exchange = exchange;
 		this.name = name;
 		this.date = date;
@@ -35,12 +35,12 @@ public class Symbols {
 		this.cik = cik;
 	}
 
-	public String getSymbolId() {
-		return symbolId;
+	public String getSymbol() {
+		return symbol;
 	}
 
-	public void setSymbolId(String symbolId) {
-		this.symbolId = symbolId;
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 
 	public String getExchange() {
@@ -127,7 +127,7 @@ public class Symbols {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((symbolId == null) ? 0 : symbolId.hashCode());
+		result = prime * result + ((symbol == null) ? 0 : symbol.hashCode());
 		return result;
 	}
 
@@ -140,17 +140,17 @@ public class Symbols {
 		if (getClass() != obj.getClass())
 			return false;
 		Symbols other = (Symbols) obj;
-		if (symbolId == null) {
-			if (other.symbolId != null)
+		if (symbol == null) {
+			if (other.symbol != null)
 				return false;
-		} else if (!symbolId.equals(other.symbolId))
+		} else if (!symbol.equals(other.symbol))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Symbols [symbolId=" + symbolId + ", exchange=" + exchange + ", name=" + name + ", date=" + date
+		return "Symbols [symbol=" + symbol + ", exchange=" + exchange + ", name=" + name + ", date=" + date
 				+ ", type=" + type + ", iexId=" + iexId + ", region=" + region + ", currency=" + currency
 				+ ", isEnabled=" + isEnabled + ", figi=" + figi + ", cik=" + cik + "]";
 	}
