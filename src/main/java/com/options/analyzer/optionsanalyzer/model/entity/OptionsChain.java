@@ -1,16 +1,16 @@
 package com.options.analyzer.optionsanalyzer.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
-public class OptionsChain {
+public class OptionsChain{
     @Id
     private String id;
     private String symbol;
@@ -23,8 +23,8 @@ public class OptionsChain {
     private String type;
     private BigDecimal volume;
     private BigDecimal openInterest;
-    private double bid;
-    private double ask;
+    private BigDecimal bid;
+    private BigDecimal ask;
     private LocalDate lastUpdated;
     private boolean isAdjusted;
 
@@ -41,8 +41,8 @@ public class OptionsChain {
                         String type,
                         BigDecimal volume,
                         BigDecimal openInterest,
-                        double bid,
-                        double ask,
+                        BigDecimal bid,
+                        BigDecimal ask,
                         LocalDate lastUpdated,
                         boolean isAdjusted) {
 
@@ -143,19 +143,19 @@ public class OptionsChain {
         this.openInterest = openInterest;
     }
 
-    public double getBid() {
+    public BigDecimal getBid() {
         return bid;
     }
 
-    public void setBid(double bid) {
+    public void setBid(BigDecimal bid) {
         this.bid = bid;
     }
 
-    public double getAsk() {
+    public BigDecimal getAsk() {
         return ask;
     }
 
-    public void setAsk(double ask) {
+    public void setAsk(BigDecimal ask) {
         this.ask = ask;
     }
 

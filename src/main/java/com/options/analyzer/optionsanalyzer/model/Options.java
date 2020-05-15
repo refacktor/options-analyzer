@@ -1,11 +1,10 @@
 package com.options.analyzer.optionsanalyzer.model;
 
-
-public class Options{
+public class Options {
 	private String expirationDate;
-	
-	public Options(){
-		
+
+	public Options() {
+
 	}
 
 	public Options(String expirationDate) {
@@ -45,6 +44,12 @@ public class Options{
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "Options [expirationDate=" + expirationDate + "]";
+	}
 	
 	
+
 }
