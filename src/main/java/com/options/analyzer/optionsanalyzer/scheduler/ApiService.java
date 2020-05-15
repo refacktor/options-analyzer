@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -58,19 +59,42 @@ public class ApiService {
 
 	@Scheduled(cron = "${api.cron}")
 	public void dataRetrieved() {
-		if (!running.get()) {
-			running.set(true);
-			System.out.println("Fetch options chain data ...");
-			List<Symbols> symbols = Arrays.asList(getSymbols());
+		try {
+			if (!running.get()) {
+				running.set(true);
+				System.out.println("Fetch options chain data ...");
+				List<Symbols> symbols = Arrays.asList(getSymbols());
 
-			List<OptionsChain> chains = symbols.parallelStream().peek(s -> System.out.println("processing symbol " + s))
-					.map(s -> getOptions(s.getSymbol())).peek(map -> System.out.println("options " + map))
-					.flatMap(map -> map.entrySet().stream()).map(e -> getOptionsChain(e.getKey(), e.getValue()))
-					.flatMap(List::stream).collect(Collectors.toList());
-			saveChains(chains);
-			running.set(false);
-			System.out.println("Finish fetching options chain data ...");
+//			List<OptionsChain> chains = symbols.parallelStream().peek(s -> System.out.println("processing symbol " + s))
+//					.map(s -> getOptions(s.getSymbol())).peek(map -> System.out.println("options " + map))
+//					.flatMap(map -> map.entrySet().stream()).map(e -> getOptionsChain(e.getKey(), e.getValue()))
+//					.flatMap(List::stream).collect(Collectors.toList());
+
+				List<CompletableFuture<List<OptionsChain>>> chains = symbols.parallelStream()
+						.peek(s -> System.out.println("processing symbol " + s)).map(s -> getChains2(s.getSymbol()))
+						.peek(map -> System.out.println("options " + map)).collect(Collectors.toList());
+
+				CompletableFuture<Void> allFutures = CompletableFuture
+						.allOf(chains.toArray(new CompletableFuture[chains.size()]));
+
+				CompletableFuture<List<List<OptionsChain>>> allChainsFuture = allFutures.thenApply(v -> {
+					return chains.stream().map(chainFuture -> chainFuture.join()).collect(Collectors.toList());
+				});
+
+				allChainsFuture.get().forEach(list -> saveChains(list));
+
+				running.set(false);
+				System.out.println("Finish fetching options chain data ...");
+			}
+		} catch (Exception exp) {
+			exp.printStackTrace();
 		}
+	}
+
+	private CompletableFuture<List<OptionsChain>> getChains2(String symbol) {
+		return CompletableFuture.supplyAsync(() -> {
+			return getOptionsChain(symbol, getOptions3(symbol));
+		});
 	}
 
 	@Async
@@ -81,6 +105,21 @@ public class ApiService {
 
 	private Symbols[] getSymbols() {
 		return restTemplate.getForObject(getUrl(SYMBOLS_END_POINT_PATH), Symbols[].class);
+	}
+
+	private List<Options> getOptions3(String symbol) {
+		try {
+			ResponseEntity<Options[]> optionsResponse = restTemplate
+					.getForEntity(getUrl(String.format(OPTIONS_END_POINT_PATH, symbol)), Options[].class);
+			if (optionsResponse.getStatusCode().is2xxSuccessful()) {
+				return Arrays.asList(optionsResponse.getBody());
+			}
+		} catch (HttpStatusCodeException ex) {
+			ex.printStackTrace();
+			System.out.println(String.format("options for symbol %s not found ", symbol));
+		}
+		return new ArrayList<>();
+
 	}
 
 	private Map<String, List<Options>> getOptions(String symbol) {
@@ -95,6 +134,12 @@ public class ApiService {
 			System.out.println(String.format("options for symbol %s not found ", symbol));
 		}
 		return new HashMap<>();
+	}
+
+	private CompletableFuture<List<OptionsChain>> getOptionsChain2(String symbol, List<Options> options) {
+		return CompletableFuture.supplyAsync(() -> {
+			return getOptionsChain(symbol, options);
+		});
 	}
 
 	private List<OptionsChain> getOptionsChain(String symbol, List<Options> options) {
