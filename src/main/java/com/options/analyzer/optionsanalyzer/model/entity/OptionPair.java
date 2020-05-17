@@ -310,9 +310,11 @@ public class OptionPair {
 		this.osiKey = osiKey;
 	}
 
-	public LocalDate getDate() {
+	public LocalDate getDate() {	
 		return timeStamp.toLocalDate();
 	}
+	
+	
 	
 	@Override
 	public int hashCode() {

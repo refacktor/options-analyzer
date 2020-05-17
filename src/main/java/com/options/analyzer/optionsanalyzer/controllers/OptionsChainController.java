@@ -6,14 +6,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,7 +39,6 @@ public class OptionsChainController {
 
 	private final OptionPairRepository optionPairRepository;
 	private final ObjectMapper mapper;
-	private ExecutorService executor = Executors.newFixedThreadPool(10);
 
 	@Autowired
 	public OptionsChainController(OptionPairRepository optionPairRepository) {
@@ -60,13 +55,15 @@ public class OptionsChainController {
 		
 		Comparator<OptionPair> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
 		
+		Comparator<OptionPair> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
+		
 		Map<LocalDate, Map<Long,Map<String, List<OptionPair>>>> chainMap = 
 				 chains
 				.stream()
 				.sorted(strikePriceComparator)
-				.collect(groupingBy(OptionPair::getDate, groupingBy(OptionPair::getUniquePair,LinkedHashMap::new,groupingBy(OptionPair::getOptionType))));
+				.sorted(dateTimeComparator)
+				.collect(groupingBy(OptionPair::getDate, LinkedHashMap::new,groupingBy(OptionPair::getUniquePair,LinkedHashMap::new,groupingBy(OptionPair::getOptionType))));
 		
-		System.out.println(chainMap.size());
 		
 		model.addAttribute("symbol", symbolSearch.getSymbol());
 		model.addAttribute("totalChain", chains.size());
@@ -76,10 +73,6 @@ public class OptionsChainController {
 
 	
 	
-	private String displaySymbol(String displaySymbol, String symbol, BigDecimal strikePrice) {
-		//"GLD May 15 '20 $98 Put"
-		return displaySymbol.replaceAll(symbol, "").replaceAll(String.valueOf(strikePrice), "");
-	}
 	
 	@PostMapping("/putData")
 	public ResponseEntity<String> putData(@RequestBody String json) throws Exception {
@@ -113,7 +106,7 @@ public class OptionsChainController {
 		JsonNode optionGreeksNode = jsonNode.get("OptionGreeks");
 		return new OptionPair(uniquePair, jsonNode.get("optionCategory").asText(),
 				jsonNode.get("optionRootSymbol").asText(),
-				LocalDateTime.ofEpochSecond(jsonNode.get("timeStamp").asLong(), 0, ZoneOffset.UTC),
+				getLocalDateTime(jsonNode.get("quoteDetail").asText(), jsonNode.get("symbol").asText(),jsonNode.get("optionType").asText()),
 				jsonNode.get("adjustedFlag").asBoolean(), jsonNode.get("displaySymbol").asText(),
 				jsonNode.get("optionType").asText(), BigDecimal.valueOf(jsonNode.get("strikePrice").asDouble()),
 				jsonNode.get("symbol").asText(), BigDecimal.valueOf(jsonNode.get("bid").asDouble()),
@@ -129,5 +122,18 @@ public class OptionsChainController {
 				BigDecimal.valueOf(optionGreeksNode.get("gamma").asDouble()),
 				BigDecimal.valueOf(optionGreeksNode.get("iv").asDouble()),
 				optionGreeksNode.get("currentValue").asBoolean());
+	}
+	
+	private LocalDateTime getLocalDateTime(String quoteDetail, String symbol, String optionType) {	
+		String date = quoteDetail.substring(quoteDetail.lastIndexOf("/")+1);
+		date = date.substring(0,date.lastIndexOf(":"));
+		date = date.substring(symbol.length() + 1,date.length() - optionType.length() - 1);
+		String year = date.substring(0,4);
+		String monthSpliter = date.substring(5);
+		String month = monthSpliter.split(":")[0];
+		String day = monthSpliter.split(":")[1];
+		day = day.length() < 2?"0"+day:day;
+		month = month.length() < 2?"0"+month:month;
+		return LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day)).atStartOfDay(ZoneOffset.UTC).toLocalDateTime();
 	}
 }
