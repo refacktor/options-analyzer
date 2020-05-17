@@ -66,6 +66,8 @@ public class OptionsChainController {
 				.sorted(strikePriceComparator)
 				.collect(groupingBy(OptionPair::getDate, groupingBy(OptionPair::getUniquePair,LinkedHashMap::new,groupingBy(OptionPair::getOptionType))));
 		
+		System.out.println(chainMap.size());
+		
 		model.addAttribute("symbol", symbolSearch.getSymbol());
 		model.addAttribute("totalChain", chains.size());
 		model.addAttribute("chainMap", chainMap);
