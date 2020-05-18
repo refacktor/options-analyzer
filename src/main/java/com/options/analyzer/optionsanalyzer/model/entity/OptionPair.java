@@ -5,11 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.options.analyzer.optionsanalyzer.utils.Utils;
@@ -17,8 +16,12 @@ import com.options.analyzer.optionsanalyzer.utils.Utils;
 @Entity
 public class OptionPair {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000)
+	@GeneratedValue(generator = "optionPairSeqGen")
 	private Long id;
+	@Version
+	private Integer version;
+
 	private long uniquePair;
 	private String optionCategory;
 	private String optionRootSymbol;
@@ -91,6 +94,14 @@ public class OptionPair {
 
 	public long getUniquePair() {
 		return uniquePair;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 	public String getOptionCategory() {
@@ -340,12 +351,40 @@ public class OptionPair {
 				optionGreeksNode.get("currentValue").asBoolean());
 	}
 
+	
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
-		result = prime * result + (int) (uniquePair ^ (uniquePair >>> 32));
+		result = prime * result + (adjustedFlag ? 1231 : 1237);
+		result = prime * result + ((ask == null) ? 0 : ask.hashCode());
+		result = prime * result + (int) (askSize ^ (askSize >>> 32));
+		result = prime * result + ((bid == null) ? 0 : bid.hashCode());
+		result = prime * result + (int) (bidSize ^ (bidSize >>> 32));
+		result = prime * result + (currentValue ? 1231 : 1237);
+		result = prime * result + ((delta == null) ? 0 : delta.hashCode());
+		result = prime * result + ((displaySymbol == null) ? 0 : displaySymbol.hashCode());
+		result = prime * result + ((gamma == null) ? 0 : gamma.hashCode());
+		result = prime * result + ((inTheMoney == null) ? 0 : inTheMoney.hashCode());
+		result = prime * result + ((iv == null) ? 0 : iv.hashCode());
+		result = prime * result + ((lastPrice == null) ? 0 : lastPrice.hashCode());
+		result = prime * result + ((netChange == null) ? 0 : netChange.hashCode());
+		result = prime * result + ((openInterest == null) ? 0 : openInterest.hashCode());
+		result = prime * result + ((optionCategory == null) ? 0 : optionCategory.hashCode());
+		result = prime * result + ((optionRootSymbol == null) ? 0 : optionRootSymbol.hashCode());
+		result = prime * result + ((optionType == null) ? 0 : optionType.hashCode());
+		result = prime * result + ((osiKey == null) ? 0 : osiKey.hashCode());
+		result = prime * result + ((quoteDetail == null) ? 0 : quoteDetail.hashCode());
+		result = prime * result + ((rho == null) ? 0 : rho.hashCode());
+		result = prime * result + ((strikePrice == null) ? 0 : strikePrice.hashCode());
+		result = prime * result + ((symbol == null) ? 0 : symbol.hashCode());
+		result = prime * result + ((theta == null) ? 0 : theta.hashCode());
+		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
+		result = prime * result + ((vega == null) ? 0 : vega.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + (int) (volume ^ (volume >>> 32));
 		return result;
 	}
 
@@ -358,9 +397,125 @@ public class OptionPair {
 		if (getClass() != obj.getClass())
 			return false;
 		OptionPair other = (OptionPair) obj;
-		if (id != other.id)
+		if (adjustedFlag != other.adjustedFlag)
 			return false;
-		if (uniquePair != other.uniquePair)
+		if (ask == null) {
+			if (other.ask != null)
+				return false;
+		} else if (!ask.equals(other.ask))
+			return false;
+		if (askSize != other.askSize)
+			return false;
+		if (bid == null) {
+			if (other.bid != null)
+				return false;
+		} else if (!bid.equals(other.bid))
+			return false;
+		if (bidSize != other.bidSize)
+			return false;
+		if (currentValue != other.currentValue)
+			return false;
+		if (delta == null) {
+			if (other.delta != null)
+				return false;
+		} else if (!delta.equals(other.delta))
+			return false;
+		if (displaySymbol == null) {
+			if (other.displaySymbol != null)
+				return false;
+		} else if (!displaySymbol.equals(other.displaySymbol))
+			return false;
+		if (gamma == null) {
+			if (other.gamma != null)
+				return false;
+		} else if (!gamma.equals(other.gamma))
+			return false;
+		if (inTheMoney == null) {
+			if (other.inTheMoney != null)
+				return false;
+		} else if (!inTheMoney.equals(other.inTheMoney))
+			return false;
+		if (iv == null) {
+			if (other.iv != null)
+				return false;
+		} else if (!iv.equals(other.iv))
+			return false;
+		if (lastPrice == null) {
+			if (other.lastPrice != null)
+				return false;
+		} else if (!lastPrice.equals(other.lastPrice))
+			return false;
+		if (netChange == null) {
+			if (other.netChange != null)
+				return false;
+		} else if (!netChange.equals(other.netChange))
+			return false;
+		if (openInterest == null) {
+			if (other.openInterest != null)
+				return false;
+		} else if (!openInterest.equals(other.openInterest))
+			return false;
+		if (optionCategory == null) {
+			if (other.optionCategory != null)
+				return false;
+		} else if (!optionCategory.equals(other.optionCategory))
+			return false;
+		if (optionRootSymbol == null) {
+			if (other.optionRootSymbol != null)
+				return false;
+		} else if (!optionRootSymbol.equals(other.optionRootSymbol))
+			return false;
+		if (optionType == null) {
+			if (other.optionType != null)
+				return false;
+		} else if (!optionType.equals(other.optionType))
+			return false;
+		if (osiKey == null) {
+			if (other.osiKey != null)
+				return false;
+		} else if (!osiKey.equals(other.osiKey))
+			return false;
+		if (quoteDetail == null) {
+			if (other.quoteDetail != null)
+				return false;
+		} else if (!quoteDetail.equals(other.quoteDetail))
+			return false;
+		if (rho == null) {
+			if (other.rho != null)
+				return false;
+		} else if (!rho.equals(other.rho))
+			return false;
+		if (strikePrice == null) {
+			if (other.strikePrice != null)
+				return false;
+		} else if (!strikePrice.equals(other.strikePrice))
+			return false;
+		if (symbol == null) {
+			if (other.symbol != null)
+				return false;
+		} else if (!symbol.equals(other.symbol))
+			return false;
+		if (theta == null) {
+			if (other.theta != null)
+				return false;
+		} else if (!theta.equals(other.theta))
+			return false;
+		if (timeStamp == null) {
+			if (other.timeStamp != null)
+				return false;
+		} else if (!timeStamp.equals(other.timeStamp))
+			return false;
+		if (vega == null) {
+			if (other.vega != null)
+				return false;
+		} else if (!vega.equals(other.vega))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		if (volume != other.volume)
 			return false;
 		return true;
 	}
