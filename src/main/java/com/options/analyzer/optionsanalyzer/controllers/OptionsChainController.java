@@ -1,20 +1,15 @@
 package com.options.analyzer.optionsanalyzer.controllers;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.groupingBy;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,8 +37,10 @@ public class OptionsChainController {
 
 	private final OptionPairRepository optionPairRepository;
 	private final ObjectMapper mapper;
-	private final ExecutorService executorService = Executors.newFixedThreadPool(5);
-
+	
+	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
+	private int batchSize;
+	
 	@Autowired
 	public OptionsChainController(OptionPairRepository optionPairRepository) {
 		this.optionPairRepository = optionPairRepository;
@@ -55,11 +52,8 @@ public class OptionsChainController {
 	@GetMapping("/getOptionChains")
 	public ModelAndView getOptionChains(@ModelAttribute SymbolSearch symbolSearch, ModelMap model) {
 		List<OptionPair> chains = optionPairRepository.findBySymbol(symbolSearch.getSymbol());
-
 		Comparator<OptionPair> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
-
 		Comparator<OptionPair> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
-
 		Map<LocalDate, Map<Long, Map<String, List<OptionPair>>>> chainMap = chains.stream()
 				.sorted(strikePriceComparator).sorted(dateTimeComparator)
 				.collect(groupingBy(OptionPair::getDate, LinkedHashMap::new, groupingBy(OptionPair::getUniquePair,
@@ -76,25 +70,12 @@ public class OptionsChainController {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
 		System.out.println(" start uploading data for symbol " + symbol);
-
 		long startTime = System.currentTimeMillis();
-
-		CompletableFuture<Void> future = supplyAsync(() -> {
-			return Utils.getOptionPairs(rootNode);
-		}, executorService).thenAcceptAsync(result -> result.forEach(this::save), executorService);
-		future.join();
+		Utils.getOptionPairs(rootNode, batchSize).parallelStream().forEach(optionPairRepository::saveAll);
 		long endTime = System.currentTimeMillis();
-		
 		long runningTime = endTime - startTime;
-		
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
-		
 		return new ResponseEntity<String>("data uploaded successfully for symbol " + symbol, HttpStatus.OK);
-	}
-
-	private void save(OptionPair optionPair) {
-		optionPairRepository.save(optionPair);
-
 	}
 
 	@GetMapping("/")
