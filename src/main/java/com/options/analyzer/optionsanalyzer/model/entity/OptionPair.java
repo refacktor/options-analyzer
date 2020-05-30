@@ -11,7 +11,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.options.analyzer.optionsanalyzer.utils.Utils;
 
 @Entity
 public class OptionPair {
@@ -328,12 +327,11 @@ public class OptionPair {
 		return timeStamp.toLocalDate();
 	}
 
-	public static OptionPair getOptionPair(long uniquePair, JsonNode jsonNode) {
+	public static OptionPair getOptionPair(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
 		JsonNode optionGreeksNode = jsonNode.get("OptionGreeks");
 		return new OptionPair(uniquePair, jsonNode.get("optionCategory").asText(),
 				jsonNode.get("optionRootSymbol").asText(),
-				Utils.getLocalDateTime(jsonNode.get("quoteDetail").asText(), jsonNode.get("symbol").asText(),
-						jsonNode.get("optionType").asText()),
+				expiration,
 				jsonNode.get("adjustedFlag").asBoolean(), jsonNode.get("displaySymbol").asText(),
 				jsonNode.get("optionType").asText(), BigDecimal.valueOf(jsonNode.get("strikePrice").asDouble()),
 				jsonNode.get("symbol").asText(), BigDecimal.valueOf(jsonNode.get("bid").asDouble()),
