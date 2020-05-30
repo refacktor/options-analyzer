@@ -3,6 +3,7 @@ package com.options.analyzer.optionsanalyzer.model.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +14,7 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Entity
-public class OptionPair {
+public class OptionQuote {
 	@Id
 	@SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000)
 	@GeneratedValue(generator = "optionPairSeqGen")
@@ -52,10 +53,10 @@ public class OptionPair {
 	private BigDecimal iv;
 	private boolean currentValue;
 
-	public OptionPair() {
+	public OptionQuote() {
 	}
 
-	public OptionPair(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime timeStamp,
+	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime timeStamp,
 			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, String symbol,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
 			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
@@ -327,9 +328,9 @@ public class OptionPair {
 		return timeStamp.toLocalDate();
 	}
 
-	public static OptionPair getOptionPair(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
+	public static OptionQuote from(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
 		JsonNode optionGreeksNode = jsonNode.get("OptionGreeks");
-		return new OptionPair(uniquePair, jsonNode.get("optionCategory").asText(),
+		return new OptionQuote(uniquePair, jsonNode.get("optionCategory").asText(),
 				jsonNode.get("optionRootSymbol").asText(),
 				expiration,
 				jsonNode.get("adjustedFlag").asBoolean(), jsonNode.get("displaySymbol").asText(),
@@ -354,178 +355,47 @@ public class OptionPair {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (adjustedFlag ? 1231 : 1237);
-		result = prime * result + ((ask == null) ? 0 : ask.hashCode());
-		result = prime * result + (int) (askSize ^ (askSize >>> 32));
-		result = prime * result + ((bid == null) ? 0 : bid.hashCode());
-		result = prime * result + (int) (bidSize ^ (bidSize >>> 32));
-		result = prime * result + (currentValue ? 1231 : 1237);
-		result = prime * result + ((delta == null) ? 0 : delta.hashCode());
-		result = prime * result + ((displaySymbol == null) ? 0 : displaySymbol.hashCode());
-		result = prime * result + ((gamma == null) ? 0 : gamma.hashCode());
-		result = prime * result + ((inTheMoney == null) ? 0 : inTheMoney.hashCode());
-		result = prime * result + ((iv == null) ? 0 : iv.hashCode());
-		result = prime * result + ((lastPrice == null) ? 0 : lastPrice.hashCode());
-		result = prime * result + ((netChange == null) ? 0 : netChange.hashCode());
-		result = prime * result + ((openInterest == null) ? 0 : openInterest.hashCode());
-		result = prime * result + ((optionCategory == null) ? 0 : optionCategory.hashCode());
-		result = prime * result + ((optionRootSymbol == null) ? 0 : optionRootSymbol.hashCode());
-		result = prime * result + ((optionType == null) ? 0 : optionType.hashCode());
-		result = prime * result + ((osiKey == null) ? 0 : osiKey.hashCode());
-		result = prime * result + ((quoteDetail == null) ? 0 : quoteDetail.hashCode());
-		result = prime * result + ((rho == null) ? 0 : rho.hashCode());
-		result = prime * result + ((strikePrice == null) ? 0 : strikePrice.hashCode());
-		result = prime * result + ((symbol == null) ? 0 : symbol.hashCode());
-		result = prime * result + ((theta == null) ? 0 : theta.hashCode());
-		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
-		result = prime * result + ((vega == null) ? 0 : vega.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		result = prime * result + (int) (volume ^ (volume >>> 32));
-		return result;
+		return Objects.hash(adjustedFlag, ask, askSize, bid, bidSize, currentValue, delta, displaySymbol, gamma, id,
+				inTheMoney, iv, lastPrice, netChange, openInterest, optionCategory, optionRootSymbol, optionType,
+				osiKey, quoteDetail, rho, strikePrice, symbol, theta, timeStamp, uniquePair, vega, version, volume);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		OptionPair other = (OptionPair) obj;
-		if (adjustedFlag != other.adjustedFlag)
-			return false;
-		if (ask == null) {
-			if (other.ask != null)
-				return false;
-		} else if (!ask.equals(other.ask))
-			return false;
-		if (askSize != other.askSize)
-			return false;
-		if (bid == null) {
-			if (other.bid != null)
-				return false;
-		} else if (!bid.equals(other.bid))
-			return false;
-		if (bidSize != other.bidSize)
-			return false;
-		if (currentValue != other.currentValue)
-			return false;
-		if (delta == null) {
-			if (other.delta != null)
-				return false;
-		} else if (!delta.equals(other.delta))
-			return false;
-		if (displaySymbol == null) {
-			if (other.displaySymbol != null)
-				return false;
-		} else if (!displaySymbol.equals(other.displaySymbol))
-			return false;
-		if (gamma == null) {
-			if (other.gamma != null)
-				return false;
-		} else if (!gamma.equals(other.gamma))
-			return false;
-		if (inTheMoney == null) {
-			if (other.inTheMoney != null)
-				return false;
-		} else if (!inTheMoney.equals(other.inTheMoney))
-			return false;
-		if (iv == null) {
-			if (other.iv != null)
-				return false;
-		} else if (!iv.equals(other.iv))
-			return false;
-		if (lastPrice == null) {
-			if (other.lastPrice != null)
-				return false;
-		} else if (!lastPrice.equals(other.lastPrice))
-			return false;
-		if (netChange == null) {
-			if (other.netChange != null)
-				return false;
-		} else if (!netChange.equals(other.netChange))
-			return false;
-		if (openInterest == null) {
-			if (other.openInterest != null)
-				return false;
-		} else if (!openInterest.equals(other.openInterest))
-			return false;
-		if (optionCategory == null) {
-			if (other.optionCategory != null)
-				return false;
-		} else if (!optionCategory.equals(other.optionCategory))
-			return false;
-		if (optionRootSymbol == null) {
-			if (other.optionRootSymbol != null)
-				return false;
-		} else if (!optionRootSymbol.equals(other.optionRootSymbol))
-			return false;
-		if (optionType == null) {
-			if (other.optionType != null)
-				return false;
-		} else if (!optionType.equals(other.optionType))
-			return false;
-		if (osiKey == null) {
-			if (other.osiKey != null)
-				return false;
-		} else if (!osiKey.equals(other.osiKey))
-			return false;
-		if (quoteDetail == null) {
-			if (other.quoteDetail != null)
-				return false;
-		} else if (!quoteDetail.equals(other.quoteDetail))
-			return false;
-		if (rho == null) {
-			if (other.rho != null)
-				return false;
-		} else if (!rho.equals(other.rho))
-			return false;
-		if (strikePrice == null) {
-			if (other.strikePrice != null)
-				return false;
-		} else if (!strikePrice.equals(other.strikePrice))
-			return false;
-		if (symbol == null) {
-			if (other.symbol != null)
-				return false;
-		} else if (!symbol.equals(other.symbol))
-			return false;
-		if (theta == null) {
-			if (other.theta != null)
-				return false;
-		} else if (!theta.equals(other.theta))
-			return false;
-		if (timeStamp == null) {
-			if (other.timeStamp != null)
-				return false;
-		} else if (!timeStamp.equals(other.timeStamp))
-			return false;
-		if (vega == null) {
-			if (other.vega != null)
-				return false;
-		} else if (!vega.equals(other.vega))
-			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
-			return false;
-		if (volume != other.volume)
-			return false;
-		return true;
+		}
+		OptionQuote other = (OptionQuote) obj;
+		return adjustedFlag == other.adjustedFlag && Objects.equals(ask, other.ask) && askSize == other.askSize
+				&& Objects.equals(bid, other.bid) && bidSize == other.bidSize && currentValue == other.currentValue
+				&& Objects.equals(delta, other.delta) && Objects.equals(displaySymbol, other.displaySymbol)
+				&& Objects.equals(gamma, other.gamma) && Objects.equals(id, other.id)
+				&& Objects.equals(inTheMoney, other.inTheMoney) && Objects.equals(iv, other.iv)
+				&& Objects.equals(lastPrice, other.lastPrice) && Objects.equals(netChange, other.netChange)
+				&& Objects.equals(openInterest, other.openInterest)
+				&& Objects.equals(optionCategory, other.optionCategory)
+				&& Objects.equals(optionRootSymbol, other.optionRootSymbol)
+				&& Objects.equals(optionType, other.optionType) && Objects.equals(osiKey, other.osiKey)
+				&& Objects.equals(quoteDetail, other.quoteDetail) && Objects.equals(rho, other.rho)
+				&& Objects.equals(strikePrice, other.strikePrice) && Objects.equals(symbol, other.symbol)
+				&& Objects.equals(theta, other.theta) && Objects.equals(timeStamp, other.timeStamp)
+				&& uniquePair == other.uniquePair && Objects.equals(vega, other.vega)
+				&& Objects.equals(version, other.version) && volume == other.volume;
 	}
 
 	@Override
 	public String toString() {
-		return "OptionPair [optionCategory=" + optionCategory + ", optionRootSymbol=" + optionRootSymbol
-				+ ", timeStamp=" + timeStamp + ", adjustedFlag=" + adjustedFlag + ", displaySymbol=" + displaySymbol
-				+ ", optionType=" + optionType + ", strikePrice=" + strikePrice + ", symbol=" + symbol + ", bid=" + bid
-				+ ", ask=" + ask + ", bidSize=" + bidSize + ", askSize=" + askSize + ", inTheMoney=" + inTheMoney
-				+ ", volume=" + volume + ", openInterest=" + openInterest + ", netChange=" + netChange + ", lastPrice="
-				+ lastPrice + ", quoteDetail=" + quoteDetail + ", osiKey=" + osiKey + "]";
+		return String.format(
+				"OptionQuote [id=%s, version=%s, uniquePair=%s, optionCategory=%s, optionRootSymbol=%s, timeStamp=%s, adjustedFlag=%s, displaySymbol=%s, optionType=%s, strikePrice=%s, symbol=%s, bid=%s, ask=%s, bidSize=%s, askSize=%s, inTheMoney=%s, volume=%s, openInterest=%s, netChange=%s, lastPrice=%s, quoteDetail=%s, osiKey=%s, rho=%s, vega=%s, theta=%s, delta=%s, gamma=%s, iv=%s, currentValue=%s]",
+				id, version, uniquePair, optionCategory, optionRootSymbol, timeStamp, adjustedFlag, displaySymbol,
+				optionType, strikePrice, symbol, bid, ask, bidSize, askSize, inTheMoney, volume, openInterest,
+				netChange, lastPrice, quoteDetail, osiKey, rho, vega, theta, delta, gamma, iv, currentValue);
 	}
 
 }

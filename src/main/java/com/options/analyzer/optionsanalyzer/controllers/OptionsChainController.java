@@ -28,22 +28,22 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.options.analyzer.optionsanalyzer.model.SymbolSearch;
-import com.options.analyzer.optionsanalyzer.model.entity.OptionPair;
-import com.options.analyzer.optionsanalyzer.repo.OptionPairRepository;
+import com.options.analyzer.optionsanalyzer.model.entity.OptionQuote;
+import com.options.analyzer.optionsanalyzer.repo.OptionQuoteRepository;
 import com.options.analyzer.optionsanalyzer.utils.Utils;
 
 @Controller
 public class OptionsChainController {
 
-	private final OptionPairRepository optionPairRepository;
+	private final OptionQuoteRepository OptionQuoteRepository;
 	private final ObjectMapper mapper;
 	
 	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
 	private int batchSize;
 	
 	@Autowired
-	public OptionsChainController(OptionPairRepository optionPairRepository) {
-		this.optionPairRepository = optionPairRepository;
+	public OptionsChainController(OptionQuoteRepository OptionQuoteRepository) {
+		this.OptionQuoteRepository = OptionQuoteRepository;
 		mapper = JsonMapper.builder().addModule(new ParameterNamesModule()).addModule(new Jdk8Module())
 				.addModule(new JavaTimeModule()).build();
 
@@ -51,13 +51,13 @@ public class OptionsChainController {
 
 	@GetMapping("/getOptionChains")
 	public ModelAndView getOptionChains(@ModelAttribute SymbolSearch symbolSearch, ModelMap model) {
-		List<OptionPair> chains = optionPairRepository.findBySymbol(symbolSearch.getSymbol());
-		Comparator<OptionPair> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
-		Comparator<OptionPair> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
-		Map<LocalDate, Map<Long, Map<String, List<OptionPair>>>> chainMap = chains.stream()
+		List<OptionQuote> chains = OptionQuoteRepository.findBySymbol(symbolSearch.getSymbol());
+		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
+		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
+		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
 				.sorted(strikePriceComparator).sorted(dateTimeComparator)
-				.collect(groupingBy(OptionPair::getDate, LinkedHashMap::new, groupingBy(OptionPair::getUniquePair,
-						LinkedHashMap::new, groupingBy(OptionPair::getOptionType))));
+				.collect(groupingBy(OptionQuote::getDate, LinkedHashMap::new, groupingBy(OptionQuote::getUniquePair,
+						LinkedHashMap::new, groupingBy(OptionQuote::getOptionType))));
 
 		model.addAttribute("symbol", symbolSearch.getSymbol());
 		model.addAttribute("totalChain", chains.size());
@@ -71,7 +71,7 @@ public class OptionsChainController {
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
-		Utils.getOptionPairs(rootNode, batchSize).parallelStream().forEach(optionPairRepository::saveAll);
+		Utils.getOptionPairs(rootNode, batchSize).parallelStream().forEach(OptionQuoteRepository::saveAll);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
