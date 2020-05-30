@@ -55,24 +55,27 @@ config = configparser.ConfigParser()
 config.read(sys.argv[1])
 (session, base_url) = oauth()
 market = Market(session, base_url)
-quotes = market.quotes(sys.argv[2])
 
-for stock in quotes:
-    symbol = stock['Product']['symbol']
+for param in sys.argv[2:]:
     
-    chainDates = market.chainDates(symbol)
+    quotes = market.quotes(param)
     
-    chains = [{'Expiration': chainDate, **market.chains(symbol, {
-            'expiryYear': chainDate['year'],
-            'expiryMonth': chainDate['month'],
-            'expiryDay': chainDate['day'],
-            'includeWeekly': 'true',
-            'priceType': 'ALL'
-        })} for chainDate in chainDates]
+    for stock in quotes:
+        symbol = stock['Product']['symbol']
         
-    data = { 'stock': stock, 'options': chains }
-    
-    with open("../src/main/resources/json/" + symbol + ".json", "a") as f:
-        f.write(json.dumps(data, indent=4))
-        print('Wrote: ' + symbol)
+        chainDates = market.chainDates(symbol)
         
+        chains = [{'Expiration': chainDate, **market.chains(symbol, {
+                'expiryYear': chainDate['year'],
+                'expiryMonth': chainDate['month'],
+                'expiryDay': chainDate['day'],
+                'includeWeekly': 'true',
+                'priceType': 'ALL'
+            })} for chainDate in chainDates]
+            
+        data = { 'stock': stock, 'options': chains }
+        
+        with open(symbol + ".json", "a") as f:
+            f.write(json.dumps(data, indent=4))
+            print('Wrote: ' + symbol)
+            
