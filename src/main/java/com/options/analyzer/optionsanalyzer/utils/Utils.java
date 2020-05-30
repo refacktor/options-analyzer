@@ -3,15 +3,18 @@ package com.options.analyzer.optionsanalyzer.utils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
+import com.google.common.collect.Lists;
 import com.options.analyzer.optionsanalyzer.model.entity.OptionPair;
 
 public class Utils {
 
-	public static List<OptionPair> getOptionPairs(JsonNode rootNode) {
+	public static List<List<OptionPair>> getOptionPairs(JsonNode rootNode, int partitionSize) {
 		List<OptionPair> results = new ArrayList<>();
 		rootNode.withArray("options").elements().forEachRemaining(node -> {
 			JsonNode optionChainResponseNode = node.get("OptionChainResponse");
@@ -29,6 +32,6 @@ public class Utils {
 				results.add(OptionPair.getOptionPair(expiration, uniquePair, putNode));
 			});
 		});
-		return results;
+		return Lists.partition(results, partitionSize); 
 	}
 }
