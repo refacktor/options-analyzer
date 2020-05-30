@@ -75,7 +75,7 @@ for param in sys.argv[2:]:
             
         data = { 'stock': stock, 'options': chains }
         
-        with open(symbol + ".json", "a") as f:
+        with open("../src/main/resources/json/%s.json" % symbol, "a") as f:
             f.write(json.dumps(data, indent=4))
             print('Wrote: ' + symbol)
             
