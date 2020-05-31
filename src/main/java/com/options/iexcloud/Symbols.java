@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.model;
+package com.options.iexcloud;
 
 import java.time.LocalDate;
 import java.util.Currency;

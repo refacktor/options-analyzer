@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.scheduler;
+package com.options.iexcloud;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,16 +20,12 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.ImmutableMap;
-import com.options.analyzer.optionsanalyzer.model.Options;
-import com.options.analyzer.optionsanalyzer.model.Symbols;
-import com.options.analyzer.optionsanalyzer.model.entity.OptionsChain;
-import com.options.analyzer.optionsanalyzer.repo.OptionsChainRepository;
 
 /**
  * Responsible to keep fetching data from the api
  */
 @Service
-public class ApiService {
+public class ApiClient {
 
 	private static final String SYMBOLS_END_POINT_PATH = "ref-data/symbols";
 	private static final String OPTIONS_END_POINT_PATH = "stock/%s/options";
@@ -47,7 +43,7 @@ public class ApiService {
 	private AtomicBoolean running = new AtomicBoolean(false);
 
 	@Autowired
-	public ApiService(OptionsChainRepository optionsChainRepository, RestTemplate restTemplate) {
+	public ApiClient(OptionsChainRepository optionsChainRepository, RestTemplate restTemplate) {
 		this.optionsChainRepository = optionsChainRepository;
 		this.restTemplate = restTemplate;
 

@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.model;
+package com.options.iexcloud;
 
 public class Options {
 	private String expirationDate;

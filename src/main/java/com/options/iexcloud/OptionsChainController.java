@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.controllers;
+package com.options.iexcloud;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -15,10 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.options.analyzer.optionsanalyzer.model.Symbols;
-import com.options.analyzer.optionsanalyzer.model.entity.OptionsChain;
-import com.options.analyzer.optionsanalyzer.repo.OptionsChainRepository;
 
 @Controller
 public class OptionsChainController {

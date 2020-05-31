@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer;
+package com.options.iexcloud;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

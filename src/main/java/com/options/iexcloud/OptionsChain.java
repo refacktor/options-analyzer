@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.model.entity;
+package com.options.iexcloud;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

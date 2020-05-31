@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.configuration;
+package com.options.iexcloud;
 
 import java.util.concurrent.Executor;
 

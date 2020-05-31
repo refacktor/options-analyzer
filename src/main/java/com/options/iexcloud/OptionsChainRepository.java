@@ -1,6 +1,5 @@
-package com.options.analyzer.optionsanalyzer.repo;
+package com.options.iexcloud;
 
-import com.options.analyzer.optionsanalyzer.model.entity.OptionsChain;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
