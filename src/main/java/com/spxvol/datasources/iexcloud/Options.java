@@ -1,4 +1,4 @@
-package com.options.iexcloud;
+package com.spxvol.datasources.iexcloud;
 
 public class Options {
 	private String expirationDate;

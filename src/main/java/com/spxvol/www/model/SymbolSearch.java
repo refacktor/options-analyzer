@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.model;
+package com.spxvol.www.model;
 
 public class SymbolSearch {
 	private String symbol;

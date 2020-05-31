@@ -1,4 +1,4 @@
-package com.options.iexcloud;
+package com.spxvol.datasources.iexcloud;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

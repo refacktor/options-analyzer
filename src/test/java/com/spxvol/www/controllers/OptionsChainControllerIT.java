@@ -1,21 +1,14 @@
-package com.options.analyzer.optionsanalyzer;
+package com.spxvol.www.controllers;
 
 import java.io.File;
 
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.options.analyzer.optionsanalyzer.controllers.OptionsChainController;
+class OptionsChainControllerIT {
 
-@SpringBootTest
-class OptionsChainControllerTest {
-
-	@Autowired private OptionsChainController target;
-	
 	@Test
 	void loadSPY() throws Exception {
 		final String pathname = "src/test/resources/json/SPY.json";
@@ -26,7 +19,7 @@ class OptionsChainControllerTest {
 	void loadTLT() throws Exception {
 		final String pathname = "src/test/resources/json/TLT.json";
 		loadData(pathname);
-		
+
 	}
 
 	@Test
@@ -42,9 +35,10 @@ class OptionsChainControllerTest {
 	}
 
 	private void loadData(final String pathname) throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
+		RestTemplate rt = new RestTemplate();
 		String json = Files.contentOf(new File(pathname), "utf-8");
-		ResponseEntity<String> out = target.putData(json);
+		HttpEntity<String> request = new HttpEntity<String>(json);
+		String out = rt.postForObject("http://localhost:9090/putData", request, String.class);
 		System.out.println(pathname + ": " + out);
 	}
 

@@ -1,4 +1,4 @@
-package com.options.iexcloud;
+package com.spxvol.datasources.iexcloud;
 
 import java.util.ArrayList;
 import java.util.Arrays;
