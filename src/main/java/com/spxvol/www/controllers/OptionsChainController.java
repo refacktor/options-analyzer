@@ -76,6 +76,11 @@ public class OptionsChainController {
 		return "privacy";
 	}
 
+	@GetMapping("/terms.html")
+	public String terms() {
+		return "terms";
+	}
+
 	@GetMapping("/symbols")
 	public String symbols(Model model) throws Exception {
 		model.addAttribute("symbolList", optionQuoteService.allSymbols());
