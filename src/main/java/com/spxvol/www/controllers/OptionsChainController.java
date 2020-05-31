@@ -70,6 +70,11 @@ public class OptionsChainController {
 	public String home(Model model) throws Exception {
 		return "index";
 	}
+	
+	@GetMapping("/privacy.html")
+	public String privacy() {
+		return "privacy";
+	}
 
 	@GetMapping("/symbols")
 	public String symbols(Model model) throws Exception {
