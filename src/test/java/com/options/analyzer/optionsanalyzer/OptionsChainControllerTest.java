@@ -18,26 +18,26 @@ class OptionsChainControllerTest {
 	
 	@Test
 	void loadSPY() throws Exception {
-		final String pathname = "src/main/resources/json/SPY.json";
+		final String pathname = "src/test/resources/json/SPY.json";
 		loadData(pathname);
 	}
 
 	@Test
 	void loadTLT() throws Exception {
-		final String pathname = "src/main/resources/json/TLT.json";
+		final String pathname = "src/test/resources/json/TLT.json";
 		loadData(pathname);
 		
 	}
 
 	@Test
 	void loadGLD() throws Exception {
-		final String pathname = "src/main/resources/json/GLD.json";
+		final String pathname = "src/test/resources/json/GLD.json";
 		loadData(pathname);
 	}
 
 	@Test
 	void loadSPX() throws Exception {
-		final String pathname = "src/main/resources/json/SPX.json";
+		final String pathname = "src/test/resources/json/SPX.json";
 		loadData(pathname);
 	}
 
