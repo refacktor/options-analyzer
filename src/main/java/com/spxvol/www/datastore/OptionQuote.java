@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
 
@@ -28,7 +29,10 @@ public class OptionQuote {
 	private String displaySymbol;
 	private String optionType;
 	private BigDecimal strikePrice;
-	private String symbol;
+	
+	@ManyToOne
+	private Underlying symbol;
+	
 	private BigDecimal bid;
 	private BigDecimal ask;
 	private long bidSize;
@@ -55,7 +59,7 @@ public class OptionQuote {
 	}
 
 	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime timeStamp,
-			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, String symbol,
+			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
 			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
 			BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma, BigDecimal iv,
@@ -69,7 +73,7 @@ public class OptionQuote {
 		this.displaySymbol = displaySymbol;
 		this.optionType = optionType;
 		this.strikePrice = strikePrice;
-		this.symbol = symbol;
+		this.symbol = underlying;
 		this.bid = bid;
 		this.ask = ask;
 		this.bidSize = bidSize;
@@ -130,7 +134,7 @@ public class OptionQuote {
 		return strikePrice;
 	}
 
-	public String getSymbol() {
+	public Underlying getSymbol() {
 		return symbol;
 	}
 
@@ -274,7 +278,7 @@ public class OptionQuote {
 		this.strikePrice = strikePrice;
 	}
 
-	public void setSymbol(String symbol) {
+	public void setSymbol(Underlying symbol) {
 		this.symbol = symbol;
 	}
 
