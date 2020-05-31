@@ -1,4 +1,4 @@
-package com.options.analyzer.optionsanalyzer.controllers;
+package com.spxvol.www.controllers;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -27,10 +27,11 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.options.analyzer.optionsanalyzer.model.SymbolSearch;
-import com.options.analyzer.optionsanalyzer.model.entity.OptionQuote;
-import com.options.analyzer.optionsanalyzer.repo.OptionQuoteRepository;
-import com.options.analyzer.optionsanalyzer.utils.Utils;
+import com.google.common.collect.Lists;
+import com.spxvol.www.datastore.OptionQuote;
+import com.spxvol.www.datastore.OptionQuoteBuilder;
+import com.spxvol.www.datastore.OptionQuoteRepository;
+import com.spxvol.www.model.SymbolSearch;
 
 @Controller
 public class OptionsChainController {
@@ -71,7 +72,8 @@ public class OptionsChainController {
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
-		Utils.getOptionPairs(rootNode, batchSize).parallelStream().forEach(OptionQuoteRepository::saveAll);
+		final List<OptionQuote> quotes = OptionQuoteBuilder.build(rootNode);
+		Lists.partition(quotes, batchSize).parallelStream().forEach(OptionQuoteRepository::saveAll);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");

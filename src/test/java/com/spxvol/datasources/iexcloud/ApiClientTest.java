@@ -1,4 +1,4 @@
-package com.options.iexcloud;
+package com.spxvol.datasources.iexcloud;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spxvol.datasources.iexcloud.ApiClient;
+import com.spxvol.datasources.iexcloud.OptionsChain;
 
 @SpringBootTest(classes = ApiClient.class)
 class ApiClientTest {
