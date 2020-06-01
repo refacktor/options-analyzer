@@ -2,8 +2,13 @@ package com.spxvol.www.datastore;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class AggregationSummary {
 
+	@Id
 	private String symbol;
 
 	private Double averageImpliedVolatility;
@@ -12,6 +17,9 @@ public class AggregationSummary {
 
 	private double highestImpliedVolatility;
 
+	public AggregationSummary() {
+	}
+	
 	public AggregationSummary(String symbol, double averageImpliedVolatility, BigDecimal lowestImpliedVolatility,
 			BigDecimal highestImpliedVolatility) {
 		super();

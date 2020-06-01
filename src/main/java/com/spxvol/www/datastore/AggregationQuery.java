@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.persistence.Query;
 
 import org.springframework.stereotype.Component;
 
@@ -16,12 +16,16 @@ public class AggregationQuery {
 
 	@PersistenceContext private EntityManager em;
 
+	@SuppressWarnings("unchecked")
 	public List<AggregationSummary> summarize() {
-		
-		TypedQuery<AggregationSummary> query =
-				em.createQuery("select new com.spxvol.www.datastore.AggregationSummary(symbol, avg(iv), min(iv), max(iv)) "
-						+ "from OptionQuote group by symbol", AggregationSummary.class);
-		
+
+		Query query = em.createNativeQuery(
+				"select symbol, median(iv) as average_implied_volatility, "
+				+ "min(iv) as lowest_implied_volatility, "
+				+ "max(iv) as highest_implied_volatility "
+				+ "from OPTION_QUOTE group by symbol",
+				AggregationSummary.class);
+
 		return query.getResultList();
 	}
 

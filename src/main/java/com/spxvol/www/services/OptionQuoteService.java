@@ -96,7 +96,7 @@ public class OptionQuoteService {
 
 	public Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap(String symbol) {
 		List<OptionQuote> chains = optionQuoteRepository
-				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get());
+				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
 		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
 		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
 		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
@@ -107,7 +107,7 @@ public class OptionQuoteService {
 	}
 
 	public void saveAll(String symbol, List<OptionQuote> quotes) {
-		optionQuoteRepository.deleteAll(optionQuoteRepository.findBySymbol(underlying(symbol)));
+		optionQuoteRepository.deleteAll(optionQuoteRepository.findBySymbol(symbol));
 		Lists.partition(quotes, batchSize).parallelStream().forEach(optionQuoteRepository::saveAll);
 	}
 
