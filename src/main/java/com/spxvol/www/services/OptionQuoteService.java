@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
 import com.google.common.collect.Lists;
+import com.spxvol.www.datastore.AggregationQuery;
+import com.spxvol.www.datastore.AggregationSummary;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
 import com.spxvol.www.datastore.Underlying;
@@ -30,12 +33,16 @@ public class OptionQuoteService {
 
 	private final OptionQuoteRepository optionQuoteRepository;
 
+	private final AggregationQuery aggregation;
+
 	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}") private int batchSize;
 
-	public OptionQuoteService(UnderlyingRepository underlyingRepository, OptionQuoteRepository optionQuoteRepository) {
+	public OptionQuoteService(AggregationQuery aggregation, UnderlyingRepository underlyingRepository,
+			OptionQuoteRepository optionQuoteRepository) {
 		super();
 		this.underlyingRepository = underlyingRepository;
 		this.optionQuoteRepository = optionQuoteRepository;
+		this.aggregation = aggregation;
 	}
 
 	public List<OptionQuote> build(JsonNode rootNode) {
@@ -61,10 +68,14 @@ public class OptionQuoteService {
 	public OptionQuote build(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
 
 		final String symbol = jsonNode.get("symbol").asText();
-		Underlying underlying = underlyingRepository.findById(symbol)
-				.orElseGet(() -> underlyingRepository.save(new Underlying(symbol)));
+		Underlying underlying = underlying(symbol);
 
 		JsonNode optionGreeksNode = jsonNode.get("OptionGreeks");
+		Function<String, BigDecimal> greek = field -> {
+			final double asDouble = optionGreeksNode.get(field).asDouble();
+			return asDouble < 0.0 || asDouble > 1.0 ? null : BigDecimal.valueOf(asDouble);
+		};
+
 		return new OptionQuote(uniquePair, jsonNode.get("optionCategory").asText(),
 				jsonNode.get("optionRootSymbol").asText(), expiration, jsonNode.get("adjustedFlag").asBoolean(),
 				jsonNode.get("displaySymbol").asText(), jsonNode.get("optionType").asText(),
@@ -74,17 +85,18 @@ public class OptionQuoteService {
 				jsonNode.get("volume").asLong(), BigDecimal.valueOf(jsonNode.get("openInterest").asDouble()),
 				BigDecimal.valueOf(jsonNode.get("netChange").asDouble()),
 				BigDecimal.valueOf(jsonNode.get("lastPrice").asDouble()), jsonNode.get("quoteDetail").asText(),
-				jsonNode.get("osiKey").asText(), BigDecimal.valueOf(optionGreeksNode.get("rho").asDouble()),
-				BigDecimal.valueOf(optionGreeksNode.get("vega").asDouble()),
-				BigDecimal.valueOf(optionGreeksNode.get("theta").asDouble()),
-				BigDecimal.valueOf(optionGreeksNode.get("delta").asDouble()),
-				BigDecimal.valueOf(optionGreeksNode.get("gamma").asDouble()),
-				BigDecimal.valueOf(optionGreeksNode.get("iv").asDouble()),
+				jsonNode.get("osiKey").asText(), greek.apply("rho"), greek.apply("vega"), greek.apply("theta"),
+				greek.apply("delta"), greek.apply("gamma"), greek.apply("iv"),
 				optionGreeksNode.get("currentValue").asBoolean());
 	}
 
+	private Underlying underlying(final String symbol) {
+		return underlyingRepository.findById(symbol).orElseGet(() -> underlyingRepository.save(new Underlying(symbol)));
+	}
+
 	public Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap(String symbol) {
-		List<OptionQuote> chains = optionQuoteRepository.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get());
+		List<OptionQuote> chains = optionQuoteRepository
+				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get());
 		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
 		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
 		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
@@ -94,8 +106,13 @@ public class OptionQuoteService {
 		return chainMap;
 	}
 
-	public void saveAll(List<OptionQuote> quotes) {
+	public void saveAll(String symbol, List<OptionQuote> quotes) {
+		optionQuoteRepository.deleteAll(optionQuoteRepository.findBySymbol(underlying(symbol)));
 		Lists.partition(quotes, batchSize).parallelStream().forEach(optionQuoteRepository::saveAll);
+	}
+
+	public List<AggregationSummary> aggregation() {
+		return aggregation.summarize();
 	}
 
 	public List<String> allSymbols() {

@@ -8,7 +8,6 @@ import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
 
@@ -30,8 +29,7 @@ public class OptionQuote {
 	private String optionType;
 	private BigDecimal strikePrice;
 	
-	@ManyToOne
-	private Underlying symbol;
+	private String symbol;
 	
 	private BigDecimal bid;
 	private BigDecimal ask;
@@ -73,7 +71,7 @@ public class OptionQuote {
 		this.displaySymbol = displaySymbol;
 		this.optionType = optionType;
 		this.strikePrice = strikePrice;
-		this.symbol = underlying;
+		this.symbol = underlying.getSymbol();
 		this.bid = bid;
 		this.ask = ask;
 		this.bidSize = bidSize;
@@ -134,7 +132,7 @@ public class OptionQuote {
 		return strikePrice;
 	}
 
-	public Underlying getSymbol() {
+	public String getSymbol() {
 		return symbol;
 	}
 
@@ -278,7 +276,7 @@ public class OptionQuote {
 		this.strikePrice = strikePrice;
 	}
 
-	public void setSymbol(Underlying symbol) {
+	public void setSymbol(String symbol) {
 		this.symbol = symbol;
 	}
 

@@ -53,7 +53,7 @@ public class OptionsChainController {
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
 		final List<OptionQuote> quotes = optionQuoteService.build(rootNode);
-		optionQuoteService.saveAll(quotes);
+		optionQuoteService.saveAll(symbol, quotes);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
@@ -83,7 +83,7 @@ public class OptionsChainController {
 
 	@GetMapping("/symbols")
 	public String symbols(Model model) throws Exception {
-		model.addAttribute("symbolList", optionQuoteService.allSymbols());
+		model.addAttribute("aggregationSummary", optionQuoteService.aggregation());
 		return "symbols";
 	}
 }

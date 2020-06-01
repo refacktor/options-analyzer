@@ -17,11 +17,17 @@
 				<thead>
 					<tr>
 						<th>Symbol</th>
+						<th>Average IV</th>
+						<th>Lowest IV</th>
+						<th>Highest IV</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr th:each="symbol : ${symbolList}">
-						<td th:inline="text">[[${symbol}]]</td>
+					<tr th:each="row : ${aggregationSummary}">
+						<td th:inline="text">[[${row.symbol}]]</td>
+						<td th:inline="text">[[${#numbers.formatPercent(row.averageImpliedVolatility,1,1)}]]</td>
+						<td th:inline="text">[[${#numbers.formatPercent(row.lowestImpliedVolatility,1,1)}]]</td>
+						<td th:inline="text">[[${#numbers.formatPercent(row.highestImpliedVolatility,1,1)}]]</td>
 					</tr>
 				</tbody>
 			</table>
