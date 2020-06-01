@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
 import com.google.common.collect.Lists;
-import com.spxvol.www.datastore.AggregationQuery;
 import com.spxvol.www.datastore.AggregationSummary;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
+import com.spxvol.www.datastore.QueryBuilder;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.datastore.UnderlyingRepository;
+import com.spxvol.www.model.ScreenerParams;
 
 @Component
 public class OptionQuoteService {
@@ -33,16 +34,16 @@ public class OptionQuoteService {
 
 	private final OptionQuoteRepository optionQuoteRepository;
 
-	private final AggregationQuery aggregation;
+	private final QueryBuilder queryBuilder;
 
 	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}") private int batchSize;
 
-	public OptionQuoteService(AggregationQuery aggregation, UnderlyingRepository underlyingRepository,
+	public OptionQuoteService(QueryBuilder queryBuilder, UnderlyingRepository underlyingRepository,
 			OptionQuoteRepository optionQuoteRepository) {
 		super();
 		this.underlyingRepository = underlyingRepository;
 		this.optionQuoteRepository = optionQuoteRepository;
-		this.aggregation = aggregation;
+		this.queryBuilder = queryBuilder;
 	}
 
 	public List<OptionQuote> build(JsonNode rootNode) {
@@ -112,7 +113,7 @@ public class OptionQuoteService {
 	}
 
 	public List<AggregationSummary> aggregation() {
-		return aggregation.summarize();
+		return queryBuilder.summarize();
 	}
 
 	public List<String> allSymbols() {
@@ -121,5 +122,9 @@ public class OptionQuoteService {
 
 	public List<OptionQuote> allOptions() {
 		return optionQuoteRepository.findAll();
+	}
+
+	public List<OptionQuote> search(ScreenerParams params) {
+		return queryBuilder.search(params);
 	}
 }

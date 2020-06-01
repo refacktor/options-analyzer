@@ -86,10 +86,4 @@ public class OptionsChainController {
 		model.addAttribute("aggregationSummary", optionQuoteService.aggregation());
 		return "symbols";
 	}
-	
-	@GetMapping("/screener")
-	public String screener(Model model) {
-		model.addAttribute("optionList", optionQuoteService.allOptions());
-		return "screener";
-	}
 }

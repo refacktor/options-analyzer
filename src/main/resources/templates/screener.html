@@ -20,11 +20,49 @@
 		<!-- table data here-->
 		<div class="row justify-content-center">
 
+			<form class="form-inline needs-validation"
+				th:action="@{/screener}" th:object="${screenerParams}">
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="minDelta"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Min. Delta</Label> <input type="text"
+						th:field="*{minDelta}" class="form-control form-control-sm"
+						id="minDelta" required />
+					<div class="form-group invalid-symbol">Min.Delta</div>
+				</div>
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="maxDelta"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Max. Delta</Label> <input type="text"
+						th:field="*{maxDelta}" class="form-control form-control-sm"
+						id="maxDelta" required />
+					<div class="form-group invalid-symbol">Max.Delta</div>
+				</div>
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="symbols"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Symbols</Label> <input type="text"
+						th:field="*{symbols}" class="form-control form-control-sm"
+						id="symbols" required />
+					<div class="form-group invalid-symbol">List of Symbols</div>
+				</div>
+
+				<div class="form-group">
+					<button type="submit"
+						class="btn btn-secondary btn-sm form-control mx-sm-3">Search</button>
+				</div>
+
+			</form>
+
 			<table class="table table-sm table-bordered calls">
 				<thead>
 					<tr>
 						<th>Underlying</th>
 						<th>Expiration</th>
+						<th>Strike</th>
 						<th>Put/Call</th>
 						<th>Open Interest</th>
 						<th>Volume</th>
@@ -33,6 +71,7 @@
 						<th>Bid</th>
 						<th>Ask</th>
 						<th>IV</th>
+						<th>Delta</th>
 						<th>ITM</th>
 					</tr>
 				</thead>
@@ -40,6 +79,7 @@
 					<tr th:each="option : ${optionList}">
 						<td th:text="${option.symbol}">XYZ</td>
 						<td th:text="${option.expiration}">2020-01-01</td>
+						<td th:text="${option.strikePrice}">99.99</td>
 						<td th:text="${option.optionType}">CALL</td>
 						<td th:classappend="price" th:text="${option.openInterest}">000
 						</td>
@@ -49,6 +89,7 @@
 						<td th:classappend="price" th:text="${option.bid}"></td>
 						<td th:classappend="price" th:text="${option.ask}"></td>
 						<td th:text="${#numbers.formatPercent(option.iv,1,0)}">20%</td>
+						<td th:text="${option.delta}">0.50</td>
 						<td th:text="${option.inTheMoney}">Y</td>
 					</tr>
 				</tbody>

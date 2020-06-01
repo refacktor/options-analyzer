@@ -1,0 +1,39 @@
+package com.spxvol.www.controllers;
+
+import java.util.logging.Logger;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import com.spxvol.www.model.ScreenerParams;
+import com.spxvol.www.services.OptionQuoteService;
+
+@Controller
+public class ScreenerController {
+
+	private final Logger logger = Logger.getLogger(getClass().getName());
+
+	private final OptionQuoteService optionQuoteService;
+
+	public ScreenerController(OptionQuoteService optionQuoteService) {
+		super();
+		this.optionQuoteService = optionQuoteService;
+	}
+
+	@GetMapping("/screener")
+	public String screener(Model model, @ModelAttribute("screenerParams") ScreenerParams params) {
+		if (params.getSymbols() == null) {
+			params.setSymbols("SPX");
+		}
+		if (params.getMinDelta() == null) {
+			params.setMinDelta((float) 0.333);
+		}
+		if (params.getMaxDelta() == null) {
+			params.setMaxDelta((float) 0.666);
+		}
+		model.addAttribute("optionList", optionQuoteService.search(params));
+		return "screener";
+	}
+}
