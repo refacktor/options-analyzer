@@ -28,7 +28,9 @@ public class OptionQuote {
 	private String displaySymbol;
 	private String optionType;
 	private BigDecimal strikePrice;
+	
 	private String symbol;
+	
 	private BigDecimal bid;
 	private BigDecimal ask;
 	private long bidSize;
@@ -55,7 +57,7 @@ public class OptionQuote {
 	}
 
 	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime timeStamp,
-			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, String symbol,
+			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
 			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
 			BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma, BigDecimal iv,
@@ -69,7 +71,7 @@ public class OptionQuote {
 		this.displaySymbol = displaySymbol;
 		this.optionType = optionType;
 		this.strikePrice = strikePrice;
-		this.symbol = symbol;
+		this.symbol = underlying.getSymbol();
 		this.bid = bid;
 		this.ask = ask;
 		this.bidSize = bidSize;

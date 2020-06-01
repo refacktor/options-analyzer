@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+	integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+	integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+	crossorigin="anonymous"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+	integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+	crossorigin="anonymous"></script>
+
+<style>
+body {
+	padding-top: 30px;
+	width: 60%;
+	margin: 0 auto;
+	font-size: 12px;
+	line-height: 1;
+}
+
+/* Just common table stuff. */
+table>tbody>tr>td {
+	vertical-align: middle;
+	text-align: center;
+	font-size: x-small;
+	padding: 0px 0px;
+	white-space: nowrap;
+}
+
+.inTheMoneyclass {
+/*LightBlue*/
+	background-color: #ADD8E6;
+}
+
+
+/*
+        .tableFixHead          { overflow-y: auto; height: 100px; }
+        .tableFixHead thead th { position: sticky; top: 0; }
+        */
+</style>
+
+
+</head>
+<body>
+	<div class="container">
+		<div class="row justify-content-center">
+			<form class="form-inline needs-validation"
+				th:action="@{/getOptionChains}" th:object="${symbolSearch}">
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="symbol"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Symbol</Label> <input type="text"
+						th:field="*{symbol}" class="form-control form-control-sm"
+						id="symbol" required />
+					<!-- <small class="form-text text-muted block">Please enter symbol</small> aria-describedby="helpSymbol"-->
+					<div class="form-group invalid-symbol">Please enter symbol.</div>
+				</div>
+				<div class="form-group">
+					<button type="submit"
+						class="btn btn-secondary btn-sm form-control mx-sm-3">Search</button>
+				</div>
+
+				<div class="form-group btn-sm">
+					<button type="submit"
+						class="btn btn-secondary btn-sm form-control mx-sm-3">Refresh</button>
+				</div>
+			</form>
+		</div>
+		<hr class="mt-3 mb-3" />
+	
+		<!-- table data here-->
+		<div class="row justify-content-center">
+			<div th:each="entry : ${chainMap}" class="table-responsive-sm" style="text-align: center">
+				<table class="table table-sm table-bordered">
+					<tr>
+						<td style="background: #eee;"><span class="font-weight-bold">CALLS</span></td>
+						<td style="background: #eee;"><span class="font-weight-bold date" th:text="${entry.key}"></span></td>
+						<td style="background: #eee;"><span class="font-weight-bold">PUTS</span></td>
+					</tr>
+					
+
+					<tr >
+						<td>
+							<div  >
+								<table class="table table-sm table-bordered calls">
+									<thead>
+										<tr>
+											<th>Open Interest</th>
+											<th>Volume</th>
+											<th>Net Change</th>
+											<th>Last</th>
+											<th>Bid</th>
+											<th>Ask</th>
+										</tr>
+									</thead>
+									<tbody>
+										<div th:each="innerMap : ${entry.value}">			
+										<tr th:each="chainCall : ${innerMap.value.get('CALL')}" th:classappend="${chainCall.inTheMoney =='y'} ? inTheMoneyclass : ''">
+											<td th:classappend="price" th:text="${chainCall.openInterest}"></td>
+											<td th:text="${chainCall.volume}"></td>
+											<td th:classappend="price" th:text="${chainCall.netChange}"></td>
+											<td th:classappend="price" th:text="${chainCall.lastPrice}"></td>
+											<td th:classappend="price" th:text="${chainCall.bid}"></td>
+											<td th:classappend="price" th:text="${chainCall.ask}"></td>
+										</tr>
+										</div>
+									</tbody>
+								</table>
+							</div>
+						</td>
+						<td>
+							<div class="table-responsive-sm" style="text-align: center;">
+
+								<table class="table table-sm table-bordered">
+									<thead>
+										<tr>
+											<th>Strike Price</th>
+										</tr>
+									</thead>
+									<tbody>
+									<div th:each="innerMap : ${entry.value}">	
+										<tr th:each="chainCall : ${innerMap.value.get('CALL')}">
+											<td th:classappend="price"  th:text="${chainCall.strikePrice}"></td>
+										</tr>
+										</div>
+									</tbody>
+								</table>
+							</div>
+						</td>
+						<td>
+							<div class="table-responsive-sm" style="text-align: center;">
+								<table class="table table-sm table-bordered puts">
+									<thead>
+										<tr>
+											<th>Bid</th>
+											<th>Ask</th>
+											<th>Last</th>
+											<th>Net Change</th>
+											<th>Volume</th>
+											<th>Open Interest</th>
+										</tr>
+									</thead>
+									<tbody>
+										<div th:each="innerMap : ${entry.value}">
+										<tr th:each="chainPut : ${innerMap.value.get('PUT')}" th:classappend="${chainPut.inTheMoney =='y'} ? inTheMoneyclass : ''">
+											<td th:classappend="price"  th:text="${chainPut.bid}"></td>
+											<td th:classappend="price"  th:text="${chainPut.ask}"></td>
+											<td th:classappend="price"  th:text="${chainPut.lastPrice}"></td>
+											<td th:classappend="price"  th:text="${chainPut.netChange}"></td>
+											<td th:classappend="price"  th:text="${chainPut.volume}"></td>
+											<td th:classappend="price"  th:text="${chainPut.openInterest}"></td>
+										</tr>
+										</div>
+									</tbody>
+								</table>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

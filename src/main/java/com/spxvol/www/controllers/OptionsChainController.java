@@ -1,15 +1,7 @@
 package com.spxvol.www.controllers;
 
-import static java.util.stream.Collectors.groupingBy;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,24 +19,19 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.collect.Lists;
 import com.spxvol.www.datastore.OptionQuote;
-import com.spxvol.www.datastore.OptionQuoteBuilder;
-import com.spxvol.www.datastore.OptionQuoteRepository;
 import com.spxvol.www.model.SymbolSearch;
+import com.spxvol.www.services.OptionQuoteService;
 
 @Controller
 public class OptionsChainController {
 
-	private final OptionQuoteRepository OptionQuoteRepository;
 	private final ObjectMapper mapper;
 	
-	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
-	private int batchSize;
+	private final OptionQuoteService optionQuoteService;
 	
-	@Autowired
-	public OptionsChainController(OptionQuoteRepository OptionQuoteRepository) {
-		this.OptionQuoteRepository = OptionQuoteRepository;
+	public OptionsChainController(OptionQuoteService optionQuoteService) {
+		this.optionQuoteService = optionQuoteService;
 		mapper = JsonMapper.builder().addModule(new ParameterNamesModule()).addModule(new Jdk8Module())
 				.addModule(new JavaTimeModule()).build();
 
@@ -52,37 +39,51 @@ public class OptionsChainController {
 
 	@GetMapping("/getOptionChains")
 	public ModelAndView getOptionChains(@ModelAttribute SymbolSearch symbolSearch, ModelMap model) {
-		List<OptionQuote> chains = OptionQuoteRepository.findBySymbol(symbolSearch.getSymbol());
-		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
-		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
-		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
-				.sorted(strikePriceComparator).sorted(dateTimeComparator)
-				.collect(groupingBy(OptionQuote::getDate, LinkedHashMap::new, groupingBy(OptionQuote::getUniquePair,
-						LinkedHashMap::new, groupingBy(OptionQuote::getOptionType))));
 
 		model.addAttribute("symbol", symbolSearch.getSymbol());
-		model.addAttribute("totalChain", chains.size());
-		model.addAttribute("chainMap", chainMap);
-		return new ModelAndView("index", model);
+		model.addAttribute("chainMap", optionQuoteService.chainMap(symbolSearch.getSymbol()));
+		return new ModelAndView("chain", model);
 	}
 
 	@PostMapping("/putData")
 	public ResponseEntity<String> putData(@RequestBody String json) throws Exception {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
+		
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
-		final List<OptionQuote> quotes = OptionQuoteBuilder.build(rootNode);
-		Lists.partition(quotes, batchSize).parallelStream().forEach(OptionQuoteRepository::saveAll);
+		final List<OptionQuote> quotes = optionQuoteService.build(rootNode);
+		optionQuoteService.saveAll(symbol, quotes);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
 		return new ResponseEntity<String>("data uploaded successfully for symbol " + symbol, HttpStatus.OK);
 	}
 
+	@GetMapping("/chain")
+	public String chain(Model model) throws Exception {
+		model.addAttribute("symbolSearch", new SymbolSearch());
+		return "chain";
+	}
+
 	@GetMapping("/")
 	public String home(Model model) throws Exception {
-		model.addAttribute("symbolSearch", new SymbolSearch());
 		return "index";
+	}
+	
+	@GetMapping("/privacy.html")
+	public String privacy() {
+		return "privacy";
+	}
+
+	@GetMapping("/terms.html")
+	public String terms() {
+		return "terms";
+	}
+
+	@GetMapping("/symbols")
+	public String symbols(Model model) throws Exception {
+		model.addAttribute("aggregationSummary", optionQuoteService.aggregation());
+		return "symbols";
 	}
 }
