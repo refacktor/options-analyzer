@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -19,12 +18,13 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
 import com.google.common.collect.Lists;
-import com.spxvol.www.datastore.AggregationQuery;
 import com.spxvol.www.datastore.AggregationSummary;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
+import com.spxvol.www.datastore.QueryBuilder;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.datastore.UnderlyingRepository;
+import com.spxvol.www.model.ScreenerParams;
 
 @Component
 public class OptionQuoteService {
@@ -33,16 +33,16 @@ public class OptionQuoteService {
 
 	private final OptionQuoteRepository optionQuoteRepository;
 
-	private final AggregationQuery aggregation;
+	private final QueryBuilder queryBuilder;
 
 	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}") private int batchSize;
 
-	public OptionQuoteService(AggregationQuery aggregation, UnderlyingRepository underlyingRepository,
+	public OptionQuoteService(QueryBuilder queryBuilder, UnderlyingRepository underlyingRepository,
 			OptionQuoteRepository optionQuoteRepository) {
 		super();
 		this.underlyingRepository = underlyingRepository;
 		this.optionQuoteRepository = optionQuoteRepository;
-		this.aggregation = aggregation;
+		this.queryBuilder = queryBuilder;
 	}
 
 	public List<OptionQuote> build(JsonNode rootNode) {
@@ -51,8 +51,8 @@ public class OptionQuoteService {
 			JsonNode optionChainResponseNode = node.get("OptionChainResponse");
 
 			JsonNode expirationNode = node.get("Expiration");
-			LocalDateTime expiration = LocalDate.of(expirationNode.get("year").asInt(),
-					expirationNode.get("month").asInt(), expirationNode.get("day").asInt()).atStartOfDay();
+			LocalDate expiration = LocalDate.of(expirationNode.get("year").asInt(),
+					expirationNode.get("month").asInt(), expirationNode.get("day").asInt());
 
 			optionChainResponseNode.withArray("OptionPair").elements().forEachRemaining(optionPairNode -> {
 				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
@@ -65,7 +65,7 @@ public class OptionQuoteService {
 		return results;
 	}
 
-	public OptionQuote build(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
+	public OptionQuote build(LocalDate expiration, long uniquePair, JsonNode jsonNode) {
 
 		final String symbol = jsonNode.get("symbol").asText();
 		Underlying underlying = underlying(symbol);
@@ -98,7 +98,7 @@ public class OptionQuoteService {
 		List<OptionQuote> chains = optionQuoteRepository
 				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
 		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
-		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getTimeStamp().compareTo(o2.getTimeStamp());
+		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getExpiration().compareTo(o2.getExpiration());
 		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
 				.sorted(strikePriceComparator).sorted(dateTimeComparator)
 				.collect(groupingBy(OptionQuote::getDate, LinkedHashMap::new, groupingBy(OptionQuote::getUniquePair,
@@ -112,10 +112,18 @@ public class OptionQuoteService {
 	}
 
 	public List<AggregationSummary> aggregation() {
-		return aggregation.summarize();
+		return queryBuilder.summarize();
 	}
 
 	public List<String> allSymbols() {
 		return underlyingRepository.findAll().stream().map(Underlying::getSymbol).collect(Collectors.toList());
+	}
+
+	public List<OptionQuote> allOptions() {
+		return optionQuoteRepository.findAll();
+	}
+
+	public List<OptionQuote> search(ScreenerParams params) {
+		return queryBuilder.search(params);
 	}
 }

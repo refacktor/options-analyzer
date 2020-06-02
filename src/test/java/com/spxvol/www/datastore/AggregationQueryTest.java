@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @SpringBootTest
-class AggregationQueryTest extends AggregationQuery {
+class AggregationQueryTest extends QueryBuilder {
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 

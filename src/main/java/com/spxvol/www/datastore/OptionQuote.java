@@ -2,7 +2,6 @@ package com.spxvol.www.datastore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -23,7 +22,7 @@ public class OptionQuote {
 	private long uniquePair;
 	private String optionCategory;
 	private String optionRootSymbol;
-	private LocalDateTime timeStamp;
+	private LocalDate expiration;
 	private boolean adjustedFlag;
 	private String displaySymbol;
 	private String optionType;
@@ -56,7 +55,7 @@ public class OptionQuote {
 	public OptionQuote() {
 	}
 
-	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime timeStamp,
+	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDate expiration,
 			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
 			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
@@ -66,7 +65,7 @@ public class OptionQuote {
 		this.uniquePair = uniquePair;
 		this.optionCategory = optionCategory;
 		this.optionRootSymbol = optionRootSymbol;
-		this.timeStamp = timeStamp;
+		this.expiration = expiration;
 		this.adjustedFlag = adjustedFlag;
 		this.displaySymbol = displaySymbol;
 		this.optionType = optionType;
@@ -112,8 +111,8 @@ public class OptionQuote {
 		return optionRootSymbol;
 	}
 
-	public LocalDateTime getTimeStamp() {
-		return timeStamp;
+	public LocalDate getExpiration() {
+		return expiration;
 	}
 
 	public boolean isAdjustedFlag() {
@@ -256,8 +255,8 @@ public class OptionQuote {
 		this.optionRootSymbol = optionRootSymbol;
 	}
 
-	public void setTimeStamp(LocalDateTime timeStamp) {
-		this.timeStamp = timeStamp;
+	public void setExpiration(LocalDate expiration) {
+		this.expiration = expiration;
 	}
 
 	public void setAdjustedFlag(boolean adjustedFlag) {
@@ -325,14 +324,14 @@ public class OptionQuote {
 	}
 
 	public LocalDate getDate() {
-		return timeStamp.toLocalDate();
+		return expiration;
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(adjustedFlag, ask, askSize, bid, bidSize, currentValue, delta, displaySymbol, gamma, id,
 				inTheMoney, iv, lastPrice, netChange, openInterest, optionCategory, optionRootSymbol, optionType,
-				osiKey, quoteDetail, rho, strikePrice, symbol, theta, timeStamp, uniquePair, vega, version, volume);
+				osiKey, quoteDetail, rho, strikePrice, symbol, theta, expiration, uniquePair, vega, version, volume);
 	}
 
 	@Override
@@ -359,7 +358,7 @@ public class OptionQuote {
 				&& Objects.equals(optionType, other.optionType) && Objects.equals(osiKey, other.osiKey)
 				&& Objects.equals(quoteDetail, other.quoteDetail) && Objects.equals(rho, other.rho)
 				&& Objects.equals(strikePrice, other.strikePrice) && Objects.equals(symbol, other.symbol)
-				&& Objects.equals(theta, other.theta) && Objects.equals(timeStamp, other.timeStamp)
+				&& Objects.equals(theta, other.theta) && Objects.equals(expiration, other.expiration)
 				&& uniquePair == other.uniquePair && Objects.equals(vega, other.vega)
 				&& Objects.equals(version, other.version) && volume == other.volume;
 	}
@@ -368,7 +367,7 @@ public class OptionQuote {
 	public String toString() {
 		return String.format(
 				"OptionQuote [id=%s, version=%s, uniquePair=%s, optionCategory=%s, optionRootSymbol=%s, timeStamp=%s, adjustedFlag=%s, displaySymbol=%s, optionType=%s, strikePrice=%s, symbol=%s, bid=%s, ask=%s, bidSize=%s, askSize=%s, inTheMoney=%s, volume=%s, openInterest=%s, netChange=%s, lastPrice=%s, quoteDetail=%s, osiKey=%s, rho=%s, vega=%s, theta=%s, delta=%s, gamma=%s, iv=%s, currentValue=%s]",
-				id, version, uniquePair, optionCategory, optionRootSymbol, timeStamp, adjustedFlag, displaySymbol,
+				id, version, uniquePair, optionCategory, optionRootSymbol, expiration, adjustedFlag, displaySymbol,
 				optionType, strikePrice, symbol, bid, ask, bidSize, askSize, inTheMoney, volume, openInterest,
 				netChange, lastPrice, quoteDetail, osiKey, rho, vega, theta, delta, gamma, iv, currentValue);
 	}
