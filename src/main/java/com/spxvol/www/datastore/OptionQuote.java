@@ -2,7 +2,6 @@ package com.spxvol.www.datastore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -23,7 +22,7 @@ public class OptionQuote {
 	private long uniquePair;
 	private String optionCategory;
 	private String optionRootSymbol;
-	private LocalDateTime expiration;
+	private LocalDate expiration;
 	private boolean adjustedFlag;
 	private String displaySymbol;
 	private String optionType;
@@ -56,7 +55,7 @@ public class OptionQuote {
 	public OptionQuote() {
 	}
 
-	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDateTime expiration,
+	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDate expiration,
 			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
 			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
@@ -113,7 +112,7 @@ public class OptionQuote {
 	}
 
 	public LocalDate getExpiration() {
-		return expiration.toLocalDate();
+		return expiration;
 	}
 
 	public boolean isAdjustedFlag() {
@@ -256,7 +255,7 @@ public class OptionQuote {
 		this.optionRootSymbol = optionRootSymbol;
 	}
 
-	public void setExpiration(LocalDateTime expiration) {
+	public void setExpiration(LocalDate expiration) {
 		this.expiration = expiration;
 	}
 
@@ -325,7 +324,7 @@ public class OptionQuote {
 	}
 
 	public LocalDate getDate() {
-		return expiration.toLocalDate();
+		return expiration;
 	}
 
 	@Override

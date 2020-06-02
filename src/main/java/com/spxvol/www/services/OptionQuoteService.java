@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -52,8 +51,8 @@ public class OptionQuoteService {
 			JsonNode optionChainResponseNode = node.get("OptionChainResponse");
 
 			JsonNode expirationNode = node.get("Expiration");
-			LocalDateTime expiration = LocalDate.of(expirationNode.get("year").asInt(),
-					expirationNode.get("month").asInt(), expirationNode.get("day").asInt()).atStartOfDay();
+			LocalDate expiration = LocalDate.of(expirationNode.get("year").asInt(),
+					expirationNode.get("month").asInt(), expirationNode.get("day").asInt());
 
 			optionChainResponseNode.withArray("OptionPair").elements().forEachRemaining(optionPairNode -> {
 				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
@@ -66,7 +65,7 @@ public class OptionQuoteService {
 		return results;
 	}
 
-	public OptionQuote build(LocalDateTime expiration, long uniquePair, JsonNode jsonNode) {
+	public OptionQuote build(LocalDate expiration, long uniquePair, JsonNode jsonNode) {
 
 		final String symbol = jsonNode.get("symbol").asText();
 		Underlying underlying = underlying(symbol);

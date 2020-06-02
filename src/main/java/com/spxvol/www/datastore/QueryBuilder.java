@@ -1,5 +1,7 @@
 package com.spxvol.www.datastore;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,6 +20,8 @@ import com.spxvol.www.model.ScreenerParams;
 
 @Component
 public class QueryBuilder {
+
+	private static final ZoneId MARKET_TIME_ZONE = ZoneId.of("America/New_York");
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
@@ -53,6 +57,15 @@ public class QueryBuilder {
 			predicate = cb.and(predicate,
 					cb.and(cb.lessThan(from.get("delta"), params.getMaxDelta()),
 			               cb.greaterThan(from.get("delta"), -params.getMaxDelta())));
+		}
+
+		if(params.getMinDays() != null) {
+			LocalDate minDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMinDays());
+			predicate = cb.and(predicate, cb.greaterThanOrEqualTo(from.get("expiration"), minDay));
+		}
+		if(params.getMaxDays() != null) {
+			LocalDate maxDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMaxDays());
+			predicate = cb.and(predicate, cb.lessThanOrEqualTo(from.get("expiration"), maxDay));
 		}
 		
 		cq.select(from).where(predicate);

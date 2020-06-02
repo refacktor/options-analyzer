@@ -8,9 +8,9 @@ public class ScreenerParams {
 
 	private Float maxDelta;
 
-	private Float minDaysToExpiration;
+	private Integer minDays;
 
-	private Float maxDaysToExpiration;
+	private Integer maxDays;
 
 	public String getSymbols() {
 		return symbols;
@@ -36,20 +36,20 @@ public class ScreenerParams {
 		this.maxDelta = maxDelta;
 	}
 
-	public Float getMaxDaysToExpiration() {
-		return maxDaysToExpiration;
+	public Integer getMinDays() {
+		return minDays;
 	}
 
-	public void setMaxDaysToExpiration(Float maxDaysToExpiration) {
-		this.maxDaysToExpiration = maxDaysToExpiration;
+	public void setMinDays(Integer minDays) {
+		this.minDays = minDays;
 	}
 
-	public Float getMinDaysToExpiration() {
-		return minDaysToExpiration;
+	public Integer getMaxDays() {
+		return maxDays;
 	}
 
-	public void setMinDaysToExpiration(Float minDaysToExpiration) {
-		this.minDaysToExpiration = minDaysToExpiration;
+	public void setMaxDays(Integer maxDays) {
+		this.maxDays = maxDays;
 	}
 
 }

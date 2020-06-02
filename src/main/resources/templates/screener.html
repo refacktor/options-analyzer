@@ -42,6 +42,24 @@
 				</div>
 
 				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="minDays"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Min. Days</Label> <input type="text"
+						th:field="*{minDays}" class="form-control form-control-sm"
+						id="minDays" required />
+					<div class="form-group invalid-symbol">Min.Days</div>
+				</div>
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="maxDays"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Max. Days</Label> <input type="text"
+						th:field="*{maxDays}" class="form-control form-control-sm"
+						id="maxDays" required />
+					<div class="form-group invalid-symbol">Max.Days</div>
+				</div>
+
+				<div class="form-group col-xs-4 col-sm-4">
 					<Label for="symbols"
 						class="col-sm-2 col-form-label col-form-label-sm"
 						style="font-size: x-small">Symbols</Label> <input type="text"

@@ -33,6 +33,12 @@ public class ScreenerController {
 		if (params.getMaxDelta() == null) {
 			params.setMaxDelta((float) 0.666);
 		}
+		if (params.getMinDays() == null) {
+			params.setMinDays(0);
+		}
+		if (params.getMaxDays() == null) {
+			params.setMaxDays(90);
+		}
 		model.addAttribute("optionList", optionQuoteService.search(params));
 		return "screener";
 	}
