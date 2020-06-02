@@ -36,7 +36,7 @@ public class OptionQuote {
 	private long askSize;
 	private String inTheMoney;
 	private long volume;
-	private BigDecimal openInterest;
+	private int openInterest;
 	private BigDecimal netChange;
 	private BigDecimal lastPrice;
 	private String quoteDetail;
@@ -58,7 +58,7 @@ public class OptionQuote {
 	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDate expiration,
 			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
 			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
-			BigDecimal openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
+			int openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
 			BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma, BigDecimal iv,
 			boolean currentValue) {
 		super();
@@ -159,7 +159,7 @@ public class OptionQuote {
 		return volume;
 	}
 
-	public BigDecimal getOpenInterest() {
+	public int getOpenInterest() {
 		return openInterest;
 	}
 
@@ -303,7 +303,7 @@ public class OptionQuote {
 		this.volume = volume;
 	}
 
-	public void setOpenInterest(BigDecimal openInterest) {
+	public void setOpenInterest(int openInterest) {
 		this.openInterest = openInterest;
 	}
 

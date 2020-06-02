@@ -82,7 +82,7 @@ public class OptionQuoteService {
 				BigDecimal.valueOf(jsonNode.get("strikePrice").asDouble()), underlying,
 				BigDecimal.valueOf(jsonNode.get("bid").asDouble()), BigDecimal.valueOf(jsonNode.get("ask").asDouble()),
 				jsonNode.get("bidSize").asLong(), jsonNode.get("askSize").asLong(), jsonNode.get("inTheMoney").asText(),
-				jsonNode.get("volume").asLong(), BigDecimal.valueOf(jsonNode.get("openInterest").asDouble()),
+				jsonNode.get("volume").asLong(), jsonNode.get("openInterest").asInt(),
 				BigDecimal.valueOf(jsonNode.get("netChange").asDouble()),
 				BigDecimal.valueOf(jsonNode.get("lastPrice").asDouble()), jsonNode.get("quoteDetail").asText(),
 				jsonNode.get("osiKey").asText(), greek.apply("rho"), greek.apply("vega"), greek.apply("theta"),
