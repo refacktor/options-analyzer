@@ -18,6 +18,9 @@
 	href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap4.min.css"
 	rel="stylesheet" />
 </head>
+<style>
+.itm-n { font-style: italic; color: gray; }
+</style>
 <body>
 	<div class="container">
 
@@ -82,37 +85,37 @@
 			<table class="table table-sm table-bordered calls">
 				<thead>
 					<tr>
-						<th>Underlying</th>
+						<th>Root</th>
 						<th>Expiration</th>
 						<th>Strike</th>
-						<th>Put/Call</th>
-						<th>Open Interest</th>
-						<th>Volume</th>
-						<th>Net Change</th>
-						<th>Last</th>
+						<th>Type</th>
 						<th>Bid</th>
 						<th>Ask</th>
+						<th>Mid</th>
+						<th class="text-nowrap">B-A</th>
 						<th>IV</th>
-						<th>Delta</th>
-						<th>ITM</th>
+						<th>&Delta;</th>
+						<th class="text-nowrap">|&Delta;|</th>
+						<th>Vol</th>
+						<th>OI</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr th:each="option : ${optionList}">
 						<td th:text="${option.symbol}">XYZ</td>
 						<td th:text="${option.expiration}">2020-01-01</td>
-						<td th:text="${option.strikePrice}">99.99</td>
+						<td th:classappend="${'itm-'+option.inTheMoney}" th:text="${option.strikePrice}">99.99</td>
 						<td th:text="${option.optionType}">CALL</td>
-						<td th:classappend="price" th:text="${option.openInterest}">000
-						</td>
-						<td th:text="${option.volume}"></td>
-						<td th:classappend="price" th:text="${option.netChange}"></td>
-						<td th:classappend="price" th:text="${option.lastPrice}"></td>
-						<td th:classappend="price" th:text="${option.bid}"></td>
-						<td th:classappend="price" th:text="${option.ask}"></td>
+						<td class="price text-right" th:text="${option.bid}">2.34</td>
+						<td class="price text-right" th:text="${option.ask}">1.23</td>
+						<td class="price text-right" th:text="${#numbers.formatCurrency((option.bid+option.ask)/2)}">1.23</td>
+						<td class="price text-right" th:text="${option.ask-option.bid}">1.23</td>
 						<td th:text="${#numbers.formatPercent(option.iv,1,0)}">20%</td>
 						<td th:text="${option.delta}">0.50</td>
-						<td th:text="${option.inTheMoney}">Y</td>
+						<td th:text="${#numbers.formatDecimal(0.5-T(java.lang.Math).abs(option.delta.doubleValue()-0.5), 1, 2)}">0.50</td>
+						<td class="text-right" th:text="${option.volume}"></td>
+						<td class="price text-right" th:text="${option.openInterest}">000
+						</td>
 					</tr>
 				</tbody>
 			</table>
