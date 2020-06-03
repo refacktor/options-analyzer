@@ -9,12 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spxvol.www.controllers.OptionsChainController;
 
 @SpringBootTest
-class OptionsChainControllerTest {
+class DataUploadControllerTest {
 
-	@Autowired private OptionsChainController target;
+	@Autowired private DataUploadController target;
 	
 	@Test
 	void loadSPY() throws Exception {
