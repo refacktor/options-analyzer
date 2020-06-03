@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script
+	src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap4.min.css"
+	rel="stylesheet" />
+</head>
+<style>
+.itm-n { font-style: italic; color: gray; }
+</style>
+<body>
+	<div class="container">
+
+		<!-- table data here-->
+		<div class="row justify-content-center">
+
+			<table class="table table-sm table-bordered calls">
+				<thead>
+					<tr>
+						<th>*</th>
+						<th th:each="expiration: ${heatmap.expirationDates}" th:text="${expiration}"/>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="strike : ${heatmap.strikes}">
+						<td th:text="${strike}">100</td>
+						<td th:each="expiration: ${heatmap.expirationDates}" th:inline="text">
+							[[${#numbers.formatPercent(heatmap.at(expiration,strike),1,0)}]]
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('table.table').DataTable({
+				 "paging": false
+			});
+		});
+	</script>
+</body>
+</html>

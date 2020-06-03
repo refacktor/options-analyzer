@@ -4,13 +4,24 @@ import static java.util.stream.Collectors.groupingBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,9 +30,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
 import com.google.common.collect.Lists;
 import com.spxvol.www.datastore.AggregationSummary;
+import com.spxvol.www.datastore.Heatmap;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
-import com.spxvol.www.datastore.QueryBuilder;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.datastore.UnderlyingRepository;
 import com.spxvol.www.model.ScreenerParams;
@@ -33,16 +44,19 @@ public class OptionQuoteService {
 
 	private final OptionQuoteRepository optionQuoteRepository;
 
-	private final QueryBuilder queryBuilder;
-
 	@Value("${spring.jpa.properties.hibernate.jdbc.batch_size}") private int batchSize;
 
-	public OptionQuoteService(QueryBuilder queryBuilder, UnderlyingRepository underlyingRepository,
+	private static final ZoneId MARKET_TIME_ZONE = ZoneId.of("America/New_York");
+
+	@PersistenceContext private EntityManager em;
+
+	private final Logger logger = Logger.getLogger(getClass().getName());
+
+	public OptionQuoteService(UnderlyingRepository underlyingRepository,
 			OptionQuoteRepository optionQuoteRepository) {
 		super();
 		this.underlyingRepository = underlyingRepository;
 		this.optionQuoteRepository = optionQuoteRepository;
-		this.queryBuilder = queryBuilder;
 	}
 
 	public List<OptionQuote> build(JsonNode rootNode) {
@@ -112,7 +126,7 @@ public class OptionQuoteService {
 	}
 
 	public List<AggregationSummary> aggregation() {
-		return queryBuilder.summarize();
+		return this.summarize();
 	}
 
 	public List<String> allSymbols() {
@@ -124,6 +138,54 @@ public class OptionQuoteService {
 	}
 
 	public List<OptionQuote> search(ScreenerParams params) {
-		return queryBuilder.search(params);
+		
+		final CriteriaBuilder cb = em.getCriteriaBuilder();
+		final CriteriaQuery<OptionQuote> cq = cb.createQuery(OptionQuote.class);
+		final Root<OptionQuote> from = cq.from(OptionQuote.class);
+		final List<String> symbols = Arrays.asList(params.getSymbols().split("[\\s\\,]+"));
+		Predicate predicate = from.get("symbol").in(symbols);
+	
+		if(params.getMinDelta() != null) {
+			predicate = cb.and(predicate,
+					cb.or(cb.greaterThan(from.get("delta"), params.getMinDelta()),
+			              cb.lessThan(from.get("delta"), -params.getMinDelta())));
+		}
+		if(params.getMaxDelta() != null) {
+			predicate = cb.and(predicate,
+					cb.and(cb.lessThan(from.get("delta"), params.getMaxDelta()),
+			               cb.greaterThan(from.get("delta"), -params.getMaxDelta())));
+		}
+	
+		if(params.getMinDays() != null) {
+			LocalDate minDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMinDays());
+			predicate = cb.and(predicate, cb.greaterThanOrEqualTo(from.get("expiration"), minDay));
+		}
+		if(params.getMaxDays() != null) {
+			LocalDate maxDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMaxDays());
+			predicate = cb.and(predicate, cb.lessThanOrEqualTo(from.get("expiration"), maxDay));
+		}
+		
+		cq.select(from).where(predicate);
+		return em.createQuery(cq).getResultList();
 	}
+
+	@SuppressWarnings("unchecked")
+	public List<AggregationSummary> summarize() {
+	
+		Query query = em.createNativeQuery(
+				"select symbol, median(iv) as average_implied_volatility, "
+				+ "min(iv) as lowest_implied_volatility, "
+				+ "max(iv) as highest_implied_volatility "
+				+ "from OPTION_QUOTE group by symbol",
+				AggregationSummary.class);
+	
+		return query.getResultList();
+	}
+	
+	public Heatmap heatmap(String symbol) {
+		List<OptionQuote> chains = optionQuoteRepository
+				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
+		return new Heatmap(chains);
+	}
+
 }
