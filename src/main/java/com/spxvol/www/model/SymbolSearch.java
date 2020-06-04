@@ -4,7 +4,7 @@ public class SymbolSearch {
 
 	private String symbol;
 
-	private boolean skipStrikes;
+	private Boolean skipStrikes;
 
 	public SymbolSearch() {
 
@@ -18,11 +18,11 @@ public class SymbolSearch {
 		this.symbol = symbol;
 	}
 
-	public boolean isSkipStrikes() {
+	public Boolean getSkipStrikes() {
 		return skipStrikes;
 	}
 
-	public void setSkipStrikes(boolean skipStrikes) {
+	public void setSkipStrikes(Boolean skipStrikes) {
 		this.skipStrikes = skipStrikes;
 	}
 

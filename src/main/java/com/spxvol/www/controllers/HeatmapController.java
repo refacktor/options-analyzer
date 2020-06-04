@@ -25,9 +25,12 @@ public class HeatmapController {
 	@RequestMapping("/heatmap")
 	public String heatmap(Model model, @ModelAttribute SymbolSearch symbol) {
 		if(symbol.getSymbol() == null) {
-			symbol.setSymbol("SPX");
+			symbol.setSymbol("SPY");
 		}
-		model.addAttribute("heatmap", optionQuoteService.heatmap(symbol.getSymbol(), symbol.isSkipStrikes()));
+		if(symbol.getSkipStrikes() == null) {
+			symbol.setSkipStrikes(Boolean.TRUE);
+		}
+		model.addAttribute("heatmap", optionQuoteService.heatmap(symbol.getSymbol(), symbol.getSkipStrikes()));
 		return "heatmap";
 	}
 }
