@@ -3,7 +3,6 @@ package com.spxvol.www.controllers;
 import java.io.File;
 
 import org.assertj.core.util.Files;
-import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,38 +10,20 @@ class UploadSampleDataToApplication {
 
 	private static final String HTTP_LOCALHOST_9090_PUT_DATA = "http://localhost:9090/putData";
 
-	@Test
-	void loadSPY() throws Exception {
-		final String pathname = "src/test/resources/etrade/SPY.json";
-		loadData(pathname);
+	public static void main(String[] args) throws Exception {
+		File dir = new File("src/test/resources/etrade");
+		for(File file: dir.listFiles()) {
+			loadData(file);
+		}
 	}
 
-	@Test
-	void loadTLT() throws Exception {
-		final String pathname = "src/test/resources/etrade/TLT.json";
-		loadData(pathname);
-
-	}
-
-	@Test
-	void loadGLD() throws Exception {
-		final String pathname = "src/test/resources/etrade/GLD.json";
-		loadData(pathname);
-	}
-
-	@Test
-	void loadSPX() throws Exception {
-		final String pathname = "src/test/resources/etrade/SPX.json";
-		loadData(pathname);
-	}
-
-	private void loadData(final String pathname) throws Exception {
+	private static void loadData(File file) throws Exception {
 		RestTemplate rt = new RestTemplate();
-		String json = Files.contentOf(new File(pathname), "utf-8");
+		String json = Files.contentOf(file, "utf-8");
 		HttpEntity<String> request = new HttpEntity<String>(json);
 		System.out.println("Uploading to " + HTTP_LOCALHOST_9090_PUT_DATA);
 		String out = rt.postForObject(HTTP_LOCALHOST_9090_PUT_DATA, request, String.class);
-		System.out.println(pathname + ": " + out);
+		System.out.println(file.toString() + ": " + out);
 	}
 
 }
