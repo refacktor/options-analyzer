@@ -23,6 +23,13 @@ public class Heatmap {
 		return chains.stream().map(OptionQuote::getExpiration).distinct().sorted().collect(Collectors.toList());
 	}
 	
+	public List<Long> getExpirationHeadings() {
+		return chains.stream().map(OptionQuote::getExpiration)
+				.map(date -> date.toEpochDay() - LocalDate.now().toEpochDay())
+				.distinct().sorted()
+				.collect(Collectors.toList());
+	}
+	
 	public List<BigDecimal> getStrikes() {
 		return chains.stream().map(OptionQuote::getStrikePrice).distinct().sorted().collect(Collectors.toList());
 	}
@@ -38,7 +45,7 @@ public class Heatmap {
 		}
 		return list.stream().map(OptionQuote::getIv)
 				.filter(x -> x != null)
-				.mapToDouble(BigDecimal::doubleValue).average().orElse(0);
+				.mapToDouble(BigDecimal::doubleValue).map(x -> x*100).average().orElse(0);
 	}
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
