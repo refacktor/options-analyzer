@@ -27,7 +27,7 @@ public class HeatmapController {
 		if(symbol.getSymbol() == null) {
 			symbol.setSymbol("SPX");
 		}
-		model.addAttribute("heatmap", optionQuoteService.heatmap(symbol.getSymbol()));
+		model.addAttribute("heatmap", optionQuoteService.heatmap(symbol.getSymbol(), symbol.isSkipStrikes()));
 		return "heatmap";
 	}
 }

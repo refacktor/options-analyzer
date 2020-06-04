@@ -2,6 +2,7 @@ package com.spxvol.www.datastore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -13,7 +14,15 @@ public class Heatmap {
 
 	private Map<LocalDate, Map<BigDecimal, List<OptionQuote>>> expirationMap;
 
-	public Heatmap(List<OptionQuote> chains) {
+	public Heatmap(List<OptionQuote> chains, boolean skipStrikes) {
+		
+		if(skipStrikes) {
+			Map<BigDecimal, List<OptionQuote>> datesByStrike = chains.stream().collect(Collectors.groupingBy(OptionQuote::getStrikePrice));
+			int maxDates = datesByStrike.values().stream().map(List::size).max(Comparator.naturalOrder()).get();
+			chains = datesByStrike.values().stream().filter(list -> list.size() == maxDates).flatMap(List::stream)
+					.collect(Collectors.toList());
+		}
+		
 		this.chains = chains;
 		this.expirationMap = chains.stream().collect(Collectors.groupingBy(OptionQuote::getExpiration,
 				Collectors.groupingBy(OptionQuote::getStrikePrice)));

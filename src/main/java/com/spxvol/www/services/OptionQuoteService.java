@@ -182,10 +182,10 @@ public class OptionQuoteService {
 		return query.getResultList();
 	}
 	
-	public Heatmap heatmap(String symbol) {
+	public Heatmap heatmap(String symbol, boolean skipStrikes) {
 		List<OptionQuote> chains = optionQuoteRepository
 				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
-		return new Heatmap(chains);
+		return new Heatmap(chains, skipStrikes);
 	}
 
 }
