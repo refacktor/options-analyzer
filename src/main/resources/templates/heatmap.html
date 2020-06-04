@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script
+	src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap4.min.css"
+	rel="stylesheet" />
+</head>
+<style>
+.itm-n { font-style: italic; color: gray; }
+</style>
+<body>
+	<div class="container">
+		<div class="row justify-content-center">
+			<form class="form-inline needs-validation"
+				th:action="@{/heatmap}" th:object="${symbolSearch}">
+
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="symbol"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Symbol</Label> <input type="text"
+						th:field="*{symbol}" class="form-control form-control-sm"
+						id="symbol" required />
+					<div class="form-group invalid-symbol">Please enter symbol.</div>
+				</div>
+				
+				<div class="form-group col-xs-4 col-sm-4">
+					<Label for="skipStrikes"
+						class="col-sm-2 col-form-label col-form-label-sm"
+						style="font-size: x-small">Skip Strikes</Label> <input type="checkbox"
+						th:field="*{skipStrikes}" class="form-control form-control-sm"
+						id="skipStrikes"/>
+					<div class="form-group invalid-symbol">Skip Uncommon Strikes</div>
+				</div>						
+				
+				<div class="form-group">
+					<button type="submit"
+						class="btn btn-secondary btn-sm form-control mx-sm-3">Search</button>
+				</div>
+
+			</form>
+		</div>
+		<hr class="mt-3 mb-3" />
+
+		<p>Implied Volatility Heatmap: Strike Price vs Days To Expiration</p>  
+
+		<!-- table data here-->
+		<div class="row justify-content-center">
+
+			<table class="table table-sm table-bordered calls">
+				<thead>
+					<tr>
+						<th>*</th>
+						<th th:each="expiration: ${heatmap.expirationHeadings}" th:text="${expiration}"/>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="strike : ${heatmap.strikes}">
+						<td th:text="${strike}">100</td>
+						<td th:each="cellValue: ${heatmap.row(strike)}" th:inline="text" 
+							th:style="${'background-color: ' + cellValue.color}">
+							[[${#numbers.formatDecimal(cellValue.value,1,0)}]]
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+	<div th:include="common/footer"></div>
+</body>
+</html>
