@@ -30,11 +30,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.uuid.Generators;
 import com.google.common.collect.Lists;
 import com.spxvol.www.datastore.AggregationSummary;
-import com.spxvol.www.datastore.Heatmap;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.datastore.UnderlyingRepository;
+import com.spxvol.www.model.Heatmap;
 import com.spxvol.www.model.ScreenerParams;
 
 @Component

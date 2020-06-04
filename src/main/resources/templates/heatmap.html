@@ -41,7 +41,7 @@
 						class="col-sm-2 col-form-label col-form-label-sm"
 						style="font-size: x-small">Skip Strikes</Label> <input type="checkbox"
 						th:field="*{skipStrikes}" class="form-control form-control-sm"
-						id="skipStrikes" required />
+						id="skipStrikes" />
 					<div class="form-group invalid-symbol">Skip Uncommon Strikes</div>
 				</div>						
 				
@@ -69,8 +69,9 @@
 				<tbody>
 					<tr th:each="strike : ${heatmap.strikes}">
 						<td th:text="${strike}">100</td>
-						<td th:each="expiration: ${heatmap.expirationDates}" th:inline="text">
-							[[${#numbers.formatDecimal(heatmap.at(expiration,strike),1,0)}]]
+						<td th:each="cellValue: ${heatmap.row(strike)}" th:inline="text" 
+							th:style="${'background-color: ' + cellValue.color}">
+							[[${#numbers.formatDecimal(cellValue.value,1,0)}]]
 						</td>
 					</tr>
 				</tbody>
