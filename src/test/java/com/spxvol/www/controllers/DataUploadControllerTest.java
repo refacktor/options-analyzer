@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @SpringBootTest
 class DataUploadControllerTest {
 
@@ -17,33 +15,32 @@ class DataUploadControllerTest {
 	
 	@Test
 	void loadSPY() throws Exception {
-		final String pathname = "src/test/resources/json/SPY.json";
+		final String pathname = "src/test/resources/etrade/SPY.json";
 		loadData(pathname);
 	}
 
 	@Test
 	void loadTLT() throws Exception {
-		final String pathname = "src/test/resources/json/TLT.json";
+		final String pathname = "src/test/resources/etrade/TLT.json";
 		loadData(pathname);
 		
 	}
 
 	@Test
 	void loadGLD() throws Exception {
-		final String pathname = "src/test/resources/json/GLD.json";
+		final String pathname = "src/test/resources/etrade/GLD.json";
 		loadData(pathname);
 	}
 
 	@Test
 	void loadSPX() throws Exception {
-		final String pathname = "src/test/resources/json/SPX.json";
+		final String pathname = "src/test/resources/etrade/SPX.json";
 		loadData(pathname);
 	}
 
 	private void loadData(final String pathname) throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
 		String json = Files.contentOf(new File(pathname), "utf-8");
-		ResponseEntity<String> out = target.putData(json);
+		ResponseEntity<String> out = target.uploadDataFromEtradeAPI(json);
 		System.out.println(pathname + ": " + out);
 	}
 
