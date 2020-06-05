@@ -1,0 +1,178 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters: 
+  SourceBucket:
+    Type: String
+    Default: "codepipeline-us-west-1-833188591093"
+    Description: S3 Bucket for artifact storage
+  GitHubRepo:
+    Type: String
+    Default: "https://github.com/atramos/options-analyzer.git"
+    Description: GitHub repository URL
+  DeploymentDescription:
+    Type: String
+    Default: "spxvol.com"
+    Description: Value for description field where needed.
+  AppName:
+    Type: String
+    Default: "spxvol"
+    Description: Name of this application.
+  EnvName:
+    Type: String
+    Default: "web1"
+    Description: Initial environment name (production, test, etc).
+  BuildSpecPath:
+    Type: String
+    Default: "buildspec.yml"
+    Description: Relative location of buildspec.yml file
+    
+Resources:
+
+  BuildServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  PipelineServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  EbServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: elasticbeanstalk.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': elasticbeanstalk
+
+  CodeBuildProject:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+       Name: !Ref AppName
+       Source:
+           Auth:
+              Type: OAUTH
+           BuildSpec: !Ref BuildSpecPath
+           GitCloneDepth: 1
+           Location: !Ref GitHubRepo
+           Type: GITHUB
+       ServiceRole: !Ref BuildServiceRole
+       Environment:
+           ComputeType: BUILD_GENERAL1_SMALL
+           Type: LINUX_CONTAINER
+           Image: aws/codebuild/standard:4.0
+       Artifacts: 
+           Location: !Ref SourceBucket
+           Name: !Ref AppName
+           NamespaceType: NONE
+           Packaging: NONE
+           Type: S3
+       Triggers:
+         Webhook: true
+         FilterGroups:
+           - - Type: EVENT
+               Pattern: PUSH
+             - Type: HEAD_REF
+               Pattern: refs/heads/master
+           
+  Pipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+       RoleArn: {"Fn::GetAtt" : ["PipelineServiceRole", "Arn"] }
+       ArtifactStore:
+          Type: S3
+          Location: !Ref SourceBucket
+       Stages: 
+        - 
+          Name: Source
+          Actions: 
+            - 
+              Name: SourceAction
+              ActionTypeId: 
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              OutputArtifacts: 
+                - Name: SourceOutput
+              Configuration: 
+                S3Bucket: !Ref SourceBucket
+                S3ObjectKey: !Ref AppName
+                PollForSourceChanges: false
+              RunOrder: 1
+        - 
+          Name: Deploy
+          Actions: 
+            - 
+              Name: DeployAction
+              ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: ElasticBeanstalk
+              InputArtifacts: 
+                - Name: SourceOutput
+              Configuration:
+                ApplicationName: !Ref EbApplication
+                EnvironmentName: !Ref EbEnvironment
+       
+  EbApplication:
+    Type: 'AWS::ElasticBeanstalk::Application'
+    Properties:
+      ApplicationName: !Ref AppName
+      Description: !Ref DeploymentDescription
+    
+  EbEnvironment:
+    Type: 'AWS::ElasticBeanstalk::Environment'
+    DependsOn: EbApplication
+    Properties:
+      ApplicationName: !Ref EbApplication
+      EnvironmentName: !Ref EnvName
+      SolutionStackName: 64bit Amazon Linux 2 v4.0.0 running Tomcat 8.5 Corretto 11
+      OptionSettings:
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: IamInstanceProfile
+          Value: "aws-elasticbeanstalk-ec2-role"
+        - Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: ServiceRole
+          Value: !Ref EbServiceRole
+      
