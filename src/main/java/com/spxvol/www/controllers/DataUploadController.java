@@ -1,6 +1,7 @@
 package com.spxvol.www.controllers;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.fasterxml.uuid.Generators;
+import com.spxvol.math.BlackScholes;
+import com.spxvol.math.BlackScholes.Indicator;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.Underlying;
+import com.spxvol.www.model.Constants;
 import com.spxvol.www.services.DataUploadService;
 
 @Controller
@@ -47,37 +51,53 @@ public class DataUploadController {
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
 		List<OptionQuote> results = new ArrayList<>();
-		rootNode.withArray("options").elements().forEachRemaining(node -> {
-			JsonNode optionChainResponseNode = node.get("OptionChainResponse");
+		rootNode.withArray("options").elements().forEachRemaining(optionsNodes -> {
+			JsonNode optionChainResponseNode = optionsNodes.get("OptionChainResponse");
 		
-			JsonNode expirationNode = node.get("Expiration");
+			JsonNode expirationNode = optionsNodes.get("Expiration");
 			LocalDate expiration = LocalDate.of(expirationNode.get("year").asInt(),
 					expirationNode.get("month").asInt(), expirationNode.get("day").asInt());
 		
 			optionChainResponseNode.withArray("OptionPair").elements().forEachRemaining(optionPairNode -> {
 				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
-				JsonNode[] nodes = { optionPairNode.get("Call"), optionPairNode.get("Put") };
-				for(JsonNode j: nodes) {
-					final String symbol1 = j.get("symbol").asText();
+				JsonNode[] optionPairNodes = { optionPairNode.get("Call"), optionPairNode.get("Put") };
+				for(JsonNode optionNode: optionPairNodes) {
+					final String symbol1 = optionNode.get("symbol").asText();
 					Underlying underlying = dataUploadService.underlying(symbol1);
 					
-					JsonNode optionGreeksNode = j.get("OptionGreeks");
+					JsonNode optionGreeksNode = optionNode.get("OptionGreeks");
 					Function<String, BigDecimal> greek = field -> {
 						final double asDouble = optionGreeksNode.get(field).asDouble();
 						return asDouble < 0.0 || asDouble > 1.0 ? null : BigDecimal.valueOf(asDouble);
 					};
-					final OptionQuote build = new OptionQuote(uniquePair, j.get("optionCategory").asText(),
-					j.get("optionRootSymbol").asText(), expiration, j.get("adjustedFlag").asBoolean(),
-					j.get("displaySymbol").asText(), j.get("optionType").asText(),
-					BigDecimal.valueOf(j.get("strikePrice").asDouble()), underlying,
-					BigDecimal.valueOf(j.get("bid").asDouble()), BigDecimal.valueOf(j.get("ask").asDouble()),
-					j.get("bidSize").asLong(), j.get("askSize").asLong(), j.get("inTheMoney").asText(),
-					j.get("volume").asLong(), j.get("openInterest").asInt(),
-					BigDecimal.valueOf(j.get("netChange").asDouble()),
-					BigDecimal.valueOf(j.get("lastPrice").asDouble()), j.get("quoteDetail").asText(),
-					j.get("osiKey").asText(), greek.apply("rho"), greek.apply("vega"), greek.apply("theta"),
+					final String optionType = optionNode.get("optionType").asText();
+					final double bid = optionNode.get("bid").asDouble();
+					final double ask = optionNode.get("ask").asDouble();
+					final double strike = optionNode.get("strikePrice").asDouble();
+					final OptionQuote build = new OptionQuote(uniquePair, optionNode.get("optionCategory").asText(),
+					optionNode.get("optionRootSymbol").asText(), expiration, optionNode.get("adjustedFlag").asBoolean(),
+					optionNode.get("displaySymbol").asText(), optionType,
+					BigDecimal.valueOf(strike), underlying,
+					BigDecimal.valueOf(bid), BigDecimal.valueOf(ask),
+					optionNode.get("bidSize").asLong(), optionNode.get("askSize").asLong(), optionNode.get("inTheMoney").asText(),
+					optionNode.get("volume").asLong(), optionNode.get("openInterest").asInt(),
+					BigDecimal.valueOf(optionNode.get("netChange").asDouble()),
+					BigDecimal.valueOf(optionNode.get("lastPrice").asDouble()), optionNode.get("quoteDetail").asText(),
+					optionNode.get("osiKey").asText(), greek.apply("rho"), greek.apply("vega"), greek.apply("theta"),
 					greek.apply("delta"), greek.apply("gamma"), greek.apply("iv"),
 					optionGreeksNode.get("currentValue").asBoolean());
+					
+					final JsonNode all = rootNode.get("stock").get("All");
+					final double stockPrice = all.get("lastTrade").asDouble();
+					int timeOfLastTrade = all.get("timeOfLastTrade").asInt();
+					final Indicator typeCode = Indicator.valueOf(optionType.substring(0,1));
+					double timeToExpiry = expiration.toEpochDay() - Instant.ofEpochSecond(timeOfLastTrade)
+							.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
+					double riskFreeRate = 0.01;
+					
+					build.setBidIV(BlackScholes.reverse(bid, typeCode, timeToExpiry, stockPrice, strike, riskFreeRate));
+					build.setAskIV(BlackScholes.reverse(ask, typeCode, timeToExpiry, stockPrice, strike, riskFreeRate));
+					
 					results.add(build);
 				}
 			});

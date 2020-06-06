@@ -17,16 +17,21 @@ public class BlackScholes {
 	private double k;
 	private double r;
 
-	public BlackScholes(double value, Indicator indicator, double t, double sT, double k, double r) {
-		this.value = value;
-		this.indicator = indicator;
-		this.t = t;
-		this.sT = sT;
-		this.k = k;
-		this.r = r;
+	public static double reverse(double optionPrice, Indicator optionType, double timeToExpiry, double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
+		BlackScholes bs = new BlackScholes(optionPrice, optionType, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
+		return bs.reverse();
+	}
+	
+	protected BlackScholes(double optionPrice, Indicator optionType, double timeToExpiry, double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
+		this.value = optionPrice;
+		this.indicator = optionType;
+		this.t = timeToExpiry;
+		this.sT = underlyingSpotPrice;
+		this.k = strikePrice;
+		this.r = riskFreeRate;
 	}
 
-	public double reverse() {
+	protected double reverse() {
 		t = t / 365;
 		value = getPValue(value, indicator, t, sT, k, r);
 
@@ -78,7 +83,7 @@ public class BlackScholes {
 		return Math.signum(x);
 	}
 
-	enum Indicator {
+	public enum Indicator {
 		P('P'), C('C');
 		char indicator;
 
@@ -91,7 +96,7 @@ public class BlackScholes {
 		}
 	}
 
-	enum RangeCode {
+	public enum RangeCode {
 		NO_SOLUTION(-1);
 		int value;
 

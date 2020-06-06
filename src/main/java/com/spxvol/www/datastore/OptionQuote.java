@@ -12,55 +12,81 @@ import javax.persistence.Version;
 
 @Entity
 public class OptionQuote {
-	@Id
-	@SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000)
-	@GeneratedValue(generator = "optionPairSeqGen")
-	private Long id;
-	@Version
-	private Integer version;
+
+	@Id @SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000) @GeneratedValue(generator = "optionPairSeqGen") private Long id;
+
+	@Version private Integer version;
 
 	private long uniquePair;
+
 	private String optionCategory;
+
 	private String optionRootSymbol;
+
 	private LocalDate expiration;
+
 	private boolean adjustedFlag;
+
 	private String displaySymbol;
+
 	private String optionType;
+
 	private BigDecimal strikePrice;
-	
+
 	private String symbol;
-	
+
 	private BigDecimal bid;
+
 	private BigDecimal ask;
+
 	private long bidSize;
+
 	private long askSize;
+
 	private String inTheMoney;
+
 	private long volume;
+
 	private int openInterest;
+
 	private BigDecimal netChange;
+
 	private BigDecimal lastPrice;
+
 	private String quoteDetail;
+
 	private String osiKey;
 
 	// OptionGreeks
 
 	private BigDecimal rho;
+
 	private BigDecimal vega;
+
 	private BigDecimal theta;
+
 	private BigDecimal delta;
+
 	private BigDecimal gamma;
+
 	private BigDecimal iv;
+
 	private boolean currentValue;
+
+	// Computed Values
+	private Double bidIV;
+
+	private Double askIV;
 
 	public OptionQuote() {
 	}
 
 	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDate expiration,
-			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice, Underlying underlying,
-			BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney, long volume,
-			int openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail, String osiKey,
-			BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma, BigDecimal iv,
-			boolean currentValue) {
+			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice,
+			Underlying underlying, BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney,
+			long volume, int openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail,
+			String osiKey, BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma,
+			BigDecimal iv, boolean currentValue) {
 		super();
 		this.uniquePair = uniquePair;
 		this.optionCategory = optionCategory;
@@ -370,6 +396,22 @@ public class OptionQuote {
 				id, version, uniquePair, optionCategory, optionRootSymbol, expiration, adjustedFlag, displaySymbol,
 				optionType, strikePrice, symbol, bid, ask, bidSize, askSize, inTheMoney, volume, openInterest,
 				netChange, lastPrice, quoteDetail, osiKey, rho, vega, theta, delta, gamma, iv, currentValue);
+	}
+
+	public Double getBidIV() {
+		return bidIV;
+	}
+
+	public void setBidIV(Double bidIV) {
+		this.bidIV = bidIV;
+	}
+
+	public Double getAskIV() {
+		return askIV;
+	}
+
+	public void setAskIV(Double askIV) {
+		this.askIV = askIV;
 	}
 
 }

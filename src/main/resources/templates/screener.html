@@ -93,7 +93,9 @@
 						<th>Ask</th>
 						<th>Mid</th>
 						<th class="text-nowrap">B-A</th>
-						<th>IV</th>
+						<th>BidIV</th>
+						<th>AskIV</th>
+						<th>IV-Spread</th>
 						<th>&Delta;</th>
 						<th class="text-nowrap">|&Delta;|</th>
 						<th>Vol</th>
@@ -110,7 +112,9 @@
 						<td class="price text-right" th:text="${option.ask}">1.23</td>
 						<td class="price text-right" th:text="${#numbers.formatCurrency((option.bid+option.ask)/2)}">1.23</td>
 						<td class="price text-right" th:text="${option.ask-option.bid}">1.23</td>
-						<td th:text="${#numbers.formatPercent(option.iv,1,0)}">20%</td>
+						<td th:text="${#numbers.formatPercent(option.bidIV,1,1)}">20%</td>
+						<td th:text="${#numbers.formatPercent(option.askIV,1,1)}">20%</td>
+						<td th:text="${#numbers.formatPercent(option.askIV - option.bidIV,1,3)}">20%</td>
 						<td th:text="${option.delta}">0.50</td>
 						<td th:text="${#numbers.formatDecimal(0.5-T(java.lang.Math).abs(option.delta.doubleValue()-0.5), 1, 2)}">0.50</td>
 						<td class="text-right" th:text="${option.volume}"></td>
