@@ -1,0 +1,14 @@
+version: 0.1
+
+phases:
+  build:
+    commands:
+      - echo Build started on `date`
+      - mvn -q -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn verify
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - options-analyzer-0.0.1-SNAPSHOT.jar
+  base-directory: 'target'

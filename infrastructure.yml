@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters: 
+  ArtifactBucket:
+    Type: String
+    Default: "codepipeline-us-west-1-833188591093"
+    Description: S3 Bucket for artifact storage
+  ArtifactName:
+    Type: String
+    Default: "target/options-analyzer-0.0.1-SNAPSHOT.jar"
+    Description: Target deployable artifact name from pom.xml and buildspec.yml
+  GitHubRepo:
+    Type: String
+    Default: "https://github.com/atramos/options-analyzer.git"
+    Description: GitHub repository URL
+  DeploymentDescription:
+    Type: String
+    Default: "spxvol.com"
+    Description: Value for description field where needed.
+  AppName:
+    Type: String
+    Default: "spxvol"
+    Description: Name of this application.
+  EnvName:
+    Type: String
+    Default: "spxvol-web"
+    Description: Initial environment name (production, test, etc).
+  BuildSpecPath:
+    Type: String
+    Default: "buildspec.yml"
+    Description: Relative location of buildspec.yml file
+  InstanceTypes:
+    Type: String
+    Default: "t3a.nano,t3.nano,t2.nano"
+    Description: The run-time EC2 instance types, comma-separated, in order of preference.
+  SpotPrice:
+    Type: Number
+    Default: 0.1
+    Description: The maximum bid amount for EC2 instances, in USD per hour.
+  EnvironmentType:
+    Type: String
+    Default: "SingleInstance"
+    AllowedValues: [ "SingleInstance", "LoadBalanced" ]
+    Description: The ElasticBeanstalk environment type.
+    
+Resources:
+
+  BuildServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  PipelineServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  EbServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: elasticbeanstalk.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': elasticbeanstalk
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  CodeBuildProject:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+       Name: !Ref AppName
+       Source:
+           Auth:
+              Type: OAUTH
+           BuildSpec: !Ref BuildSpecPath
+           GitCloneDepth: 1
+           Location: !Ref GitHubRepo
+           Type: GITHUB
+       ServiceRole: !Ref BuildServiceRole
+       Environment:
+           ComputeType: BUILD_GENERAL1_SMALL
+           Type: LINUX_CONTAINER
+           Image: aws/codebuild/standard:4.0
+       Artifacts: 
+           Location: !Ref ArtifactBucket
+           Path: !Ref AppName
+           Name: "deployable.zip"
+           NamespaceType: NONE
+           Packaging: ZIP
+           Type: S3
+       Triggers:
+         Webhook: true
+         FilterGroups:
+           - - Type: EVENT
+               Pattern: PUSH
+             - Type: HEAD_REF
+               Pattern: refs/heads/master
+           
+  Pipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+       Name: !Ref AppName
+       RoleArn: {"Fn::GetAtt" : ["PipelineServiceRole", "Arn"] }
+       ArtifactStore:
+          Type: S3
+          Location: !Ref ArtifactBucket
+       Stages: 
+        - 
+          Name: Source
+          Actions: 
+            - 
+              Name: SourceAction
+              ActionTypeId: 
+                Category: Source
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              OutputArtifacts: 
+                - Name: "ZipFile"
+              Configuration: 
+                S3Bucket: !Ref ArtifactBucket
+                S3ObjectKey: !Sub [ "${AppName}/deployable.zip", {} ]
+                PollForSourceChanges: true
+              RunOrder: 1
+        - 
+          Name: Deploy
+          Actions: 
+            - 
+              Name: DeployAction
+              ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: ElasticBeanstalk
+              InputArtifacts: 
+                - Name: "ZipFile"
+              Configuration:
+                ApplicationName: !Ref EbApplication
+                EnvironmentName: !Ref EbEnvironment
+       
+  EbApplication:
+    Type: 'AWS::ElasticBeanstalk::Application'
+    Properties:
+      ApplicationName: !Ref AppName
+      Description: !Ref DeploymentDescription
+    
+  EbEnvironment:
+    Type: 'AWS::ElasticBeanstalk::Environment'
+    DependsOn: EbApplication
+    Properties:
+      ApplicationName: !Ref EbApplication
+      EnvironmentName: !Ref EnvName
+      SolutionStackName: 64bit Amazon Linux 2 v3.0.2 running Corretto 11
+      OptionSettings:
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: IamInstanceProfile
+          Value: "aws-elasticbeanstalk-ec2-role"
+        - Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: ServiceRole
+          Value: !Ref EbServiceRole
+        - Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: EnvironmentType
+          Value: !Ref EnvironmentType
+        - Namespace: 'aws:ec2:instances'
+          OptionName: InstanceTypes
+          Value: !Ref InstanceTypes
+        - Namespace: 'aws:ec2:instances'
+          OptionName: EnableSpot
+          Value: true
+        - Namespace: 'aws:ec2:instances'
+          OptionName: SpotMaxPrice
+          Value: !Ref SpotPrice
+      
