@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,11 +24,16 @@ class OptionQuoteServiceTest {
 	@Autowired private DataUploadController uploader;
 
 	@Autowired private OptionQuoteService target;
+	
+	boolean init = false;
 
-	@BeforeAll
+	@BeforeEach
 	public void loadData() throws Exception {
-		String json = Files.contentOf(new File("src/test/resources/etrade/SPX.json"), "utf-8");
-		uploader.uploadDataFromEtradeAPI(json);
+		if(!init) {
+			String json = Files.contentOf(new File("src/test/resources/etrade/SPX.json"), "utf-8");
+			uploader.uploadDataFromEtradeAPI(json);
+			init = true;
+		}
 	}
 	
 	@Test
