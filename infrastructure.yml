@@ -1,9 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters: 
-  SourceBucket:
+  ArtifactBucket:
     Type: String
     Default: "codepipeline-us-west-1-833188591093"
     Description: S3 Bucket for artifact storage
+  ArtifactName:
+    Type: String
+    Default: "target/options-analyzer-0.0.1-SNAPSHOT.jar"
+    Description: Target deployable artifact name from pom.xml and buildspec.yml
   GitHubRepo:
     Type: String
     Default: "https://github.com/atramos/options-analyzer.git"
@@ -18,12 +22,25 @@ Parameters:
     Description: Name of this application.
   EnvName:
     Type: String
-    Default: "web1"
+    Default: "spxvol-web"
     Description: Initial environment name (production, test, etc).
   BuildSpecPath:
     Type: String
     Default: "buildspec.yml"
     Description: Relative location of buildspec.yml file
+  InstanceTypes:
+    Type: String
+    Default: "t3a.nano,t3.nano,t2.nano"
+    Description: The run-time EC2 instance types, comma-separated, in order of preference.
+  SpotPrice:
+    Type: Number
+    Default: 0.1
+    Description: The maximum bid amount for EC2 instances, in USD per hour.
+  EnvironmentType:
+    Type: String
+    Default: "SingleInstance"
+    AllowedValues: [ "SingleInstance", "LoadBalanced" ]
+    Description: The ElasticBeanstalk environment type.
     
 Resources:
 
@@ -83,6 +100,14 @@ Resources:
             Condition:
               StringEquals:
                 'sts:ExternalId': elasticbeanstalk
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
 
   CodeBuildProject:
     Type: 'AWS::CodeBuild::Project'
@@ -101,10 +126,11 @@ Resources:
            Type: LINUX_CONTAINER
            Image: aws/codebuild/standard:4.0
        Artifacts: 
-           Location: !Ref SourceBucket
-           Name: !Ref AppName
+           Location: !Ref ArtifactBucket
+           Path: !Ref AppName
+           Name: "deployable.zip"
            NamespaceType: NONE
-           Packaging: NONE
+           Packaging: ZIP
            Type: S3
        Triggers:
          Webhook: true
@@ -117,10 +143,11 @@ Resources:
   Pipeline:
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
+       Name: !Ref AppName
        RoleArn: {"Fn::GetAtt" : ["PipelineServiceRole", "Arn"] }
        ArtifactStore:
           Type: S3
-          Location: !Ref SourceBucket
+          Location: !Ref ArtifactBucket
        Stages: 
         - 
           Name: Source
@@ -133,11 +160,11 @@ Resources:
                 Version: 1
                 Provider: S3
               OutputArtifacts: 
-                - Name: SourceOutput
+                - Name: "ZipFile"
               Configuration: 
-                S3Bucket: !Ref SourceBucket
-                S3ObjectKey: !Ref AppName
-                PollForSourceChanges: false
+                S3Bucket: !Ref ArtifactBucket
+                S3ObjectKey: !Sub [ "${AppName}/deployable.zip", {} ]
+                PollForSourceChanges: true
               RunOrder: 1
         - 
           Name: Deploy
@@ -150,7 +177,7 @@ Resources:
                 Version: 1
                 Provider: ElasticBeanstalk
               InputArtifacts: 
-                - Name: SourceOutput
+                - Name: "ZipFile"
               Configuration:
                 ApplicationName: !Ref EbApplication
                 EnvironmentName: !Ref EbEnvironment
@@ -167,7 +194,7 @@ Resources:
     Properties:
       ApplicationName: !Ref EbApplication
       EnvironmentName: !Ref EnvName
-      SolutionStackName: 64bit Amazon Linux 2 v4.0.0 running Tomcat 8.5 Corretto 11
+      SolutionStackName: 64bit Amazon Linux 2 v3.0.2 running Corretto 11
       OptionSettings:
         - Namespace: 'aws:autoscaling:launchconfiguration'
           OptionName: IamInstanceProfile
@@ -175,4 +202,16 @@ Resources:
         - Namespace: 'aws:elasticbeanstalk:environment'
           OptionName: ServiceRole
           Value: !Ref EbServiceRole
+        - Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: EnvironmentType
+          Value: !Ref EnvironmentType
+        - Namespace: 'aws:ec2:instances'
+          OptionName: InstanceTypes
+          Value: !Ref InstanceTypes
+        - Namespace: 'aws:ec2:instances'
+          OptionName: EnableSpot
+          Value: true
+        - Namespace: 'aws:ec2:instances'
+          OptionName: SpotMaxPrice
+          Value: !Ref SpotPrice
       
