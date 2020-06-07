@@ -4,9 +4,9 @@ public class ScreenerParams {
 
 	private String symbols;
 
-	private Float minDelta;
+	private Float minProbability;
 
-	private Float maxDelta;
+	private Float maxProbability;
 
 	private Integer minDays;
 
@@ -20,20 +20,20 @@ public class ScreenerParams {
 		this.symbols = symbols;
 	}
 
-	public Float getMinDelta() {
-		return minDelta;
+	public Float getMinProbability() {
+		return minProbability;
 	}
 
-	public void setMinDelta(Float minDelta) {
-		this.minDelta = minDelta;
+	public void setMinProbability(Float minProbability) {
+		this.minProbability = minProbability;
 	}
 
-	public Float getMaxDelta() {
-		return maxDelta;
+	public Float getMaxProbability() {
+		return maxProbability;
 	}
 
-	public void setMaxDelta(Float maxDelta) {
-		this.maxDelta = maxDelta;
+	public void setMaxProbability(Float maxProbability) {
+		this.maxProbability = maxProbability;
 	}
 
 	public Integer getMinDays() {

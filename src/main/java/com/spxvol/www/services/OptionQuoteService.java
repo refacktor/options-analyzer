@@ -3,7 +3,6 @@ package com.spxvol.www.services;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -27,6 +26,7 @@ import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.OptionQuoteRepository;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.datastore.UnderlyingRepository;
+import com.spxvol.www.model.Constants;
 import com.spxvol.www.model.Heatmap;
 import com.spxvol.www.model.ScreenerParams;
 
@@ -36,8 +36,6 @@ public class OptionQuoteService {
 	private final UnderlyingRepository underlyingRepository;
 
 	private final OptionQuoteRepository optionQuoteRepository;
-
-	private static final ZoneId MARKET_TIME_ZONE = ZoneId.of("America/New_York");
 
 	@PersistenceContext private EntityManager em;
 
@@ -82,23 +80,21 @@ public class OptionQuoteService {
 		final List<String> symbols = Arrays.asList(params.getSymbols().split("[\\s\\,]+"));
 		Predicate predicate = from.get("symbol").in(symbols);
 	
-		if(params.getMinDelta() != null) {
-			predicate = cb.and(predicate,
-					cb.or(cb.greaterThan(from.get("delta"), params.getMinDelta()),
-			              cb.lessThan(from.get("delta"), -params.getMinDelta())));
+		if(params.getMinProbability() != null) {
+			predicate = cb.and(predicate, 
+							cb.greaterThan(from.get("probability"), params.getMinProbability()));
 		}
-		if(params.getMaxDelta() != null) {
-			predicate = cb.and(predicate,
-					cb.and(cb.lessThan(from.get("delta"), params.getMaxDelta()),
-			               cb.greaterThan(from.get("delta"), -params.getMaxDelta())));
+		if(params.getMaxProbability() != null) {
+			predicate = cb.and(predicate, 
+							cb.lessThan(from.get("probability"), params.getMaxProbability()));
 		}
 	
 		if(params.getMinDays() != null) {
-			LocalDate minDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMinDays());
+			LocalDate minDay = LocalDate.now(Constants.MARKET_TIME_ZONE).plusDays(params.getMinDays());
 			predicate = cb.and(predicate, cb.greaterThanOrEqualTo(from.get("expiration"), minDay));
 		}
 		if(params.getMaxDays() != null) {
-			LocalDate maxDay = LocalDate.now(MARKET_TIME_ZONE).plusDays(params.getMaxDays());
+			LocalDate maxDay = LocalDate.now(Constants.MARKET_TIME_ZONE).plusDays(params.getMaxDays());
 			predicate = cb.and(predicate, cb.lessThanOrEqualTo(from.get("expiration"), maxDay));
 		}
 		

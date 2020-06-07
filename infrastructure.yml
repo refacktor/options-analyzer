@@ -4,10 +4,6 @@ Parameters:
     Type: String
     Default: "codepipeline-us-west-1-833188591093"
     Description: S3 Bucket for artifact storage
-  ArtifactName:
-    Type: String
-    Default: "target/options-analyzer-0.0.1-SNAPSHOT.jar"
-    Description: Target deployable artifact name from pom.xml and buildspec.yml
   GitHubRepo:
     Type: String
     Default: "https://github.com/atramos/options-analyzer.git"
