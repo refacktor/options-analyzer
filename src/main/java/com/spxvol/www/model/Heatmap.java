@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.spxvol.www.datastore.OptionQuote;
+import com.spxvol.www.datastore.Underlying;
 
 public class Heatmap {
 
@@ -23,7 +24,11 @@ public class Heatmap {
 
 	private double maxIV;
 
-	public Heatmap(List<OptionQuote> chains, boolean skipStrikes) {
+	private Underlying underlying;
+
+	public Heatmap(Underlying underlying, List<OptionQuote> chains, boolean skipStrikes) {
+		
+		chains.removeIf(o -> o.getDate().equals(underlying.getLastTradeTZ().toLocalDate()));
 
 		if (skipStrikes) {
 			Map<BigDecimal, List<OptionQuote>> datesByStrike = chains.stream()
@@ -33,6 +38,7 @@ public class Heatmap {
 					.collect(Collectors.toList());
 		}
 
+		this.underlying = underlying;
 		this.chains = chains;
 		this.expirationMap = chains.stream().collect(
 				Collectors.groupingBy(OptionQuote::getExpiration, Collectors.groupingBy(OptionQuote::getStrikePrice)));
@@ -48,8 +54,9 @@ public class Heatmap {
 	}
 
 	public List<Long> getExpirationHeadings() {
+		long now = underlying.getLastTradeTZ().toLocalDate().toEpochDay();
 		return chains.stream().map(OptionQuote::getExpiration)
-				.map(date -> date.toEpochDay() - LocalDate.now().toEpochDay()).distinct().sorted()
+				.map(date -> date.toEpochDay() - now).distinct().sorted()
 				.collect(Collectors.toList());
 	}
 
@@ -91,5 +98,10 @@ public class Heatmap {
 	}
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
+
+	
+	public Underlying getUnderlying() {
+		return underlying;
+	}
 
 }

@@ -116,9 +116,9 @@ public class OptionQuoteService {
 	}
 	
 	public Heatmap heatmap(String symbol, boolean skipStrikes) {
-		List<OptionQuote> chains = optionQuoteRepository
-				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
-		return new Heatmap(chains, skipStrikes);
+		final Underlying underlying = underlyingRepository.findById(symbol.toUpperCase()).get();
+		List<OptionQuote> chains = optionQuoteRepository.findBySymbol(underlying.getSymbol());
+		return new Heatmap(underlying, chains, skipStrikes);
 	}
 
 }

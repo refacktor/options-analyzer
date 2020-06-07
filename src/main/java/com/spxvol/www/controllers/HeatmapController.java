@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.spxvol.www.model.Heatmap;
 import com.spxvol.www.model.SymbolSearch;
 import com.spxvol.www.services.OptionQuoteService;
 
@@ -30,7 +31,8 @@ public class HeatmapController {
 		if(symbol.getSkipStrikes() == null) {
 			symbol.setSkipStrikes(Boolean.TRUE);
 		}
-		model.addAttribute("heatmap", optionQuoteService.heatmap(symbol.getSymbol(), symbol.getSkipStrikes()));
+		final Heatmap heatmap = optionQuoteService.heatmap(symbol.getSymbol(), symbol.getSkipStrikes());
+		model.addAttribute("heatmap", heatmap);
 		return "heatmap";
 	}
 }
