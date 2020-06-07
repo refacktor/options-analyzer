@@ -45,6 +45,11 @@ public class DataUploadController {
 	public ResponseEntity<String> uploadDataFromEtradeAPI(@RequestBody String json) throws Exception {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
+		final JsonNode all = rootNode.get("stock").get("All");
+		
+		Underlying underlying = dataUploadService.underlying(symbol);
+		underlying.setLastTrade(Instant.ofEpochSecond(all.get("timeOfLastTrade").asLong()));
+		underlying.setPrice(all.get("lastTrade").asDouble());
 		
 		System.out.println(" start uploading data for symbol " + symbol);
 		long startTime = System.currentTimeMillis();
@@ -60,8 +65,6 @@ public class DataUploadController {
 				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
 				JsonNode[] optionPairNodes = { optionPairNode.get("Call"), optionPairNode.get("Put") };
 				for(JsonNode optionNode: optionPairNodes) {
-					final String symbol1 = optionNode.get("symbol").asText();
-					Underlying underlying = dataUploadService.underlying(symbol1);
 
 					OptionQuote build = mapper.convertValue(optionNode, OptionQuote.class);
 					build.setUniquePair(uniquePair);
@@ -80,16 +83,13 @@ public class DataUploadController {
 						build.setIv(0.0);
 					}
 					
-					final JsonNode all = rootNode.get("stock").get("All");
-					final double stockPrice = all.get("lastTrade").asDouble();
-					int timeOfLastTrade = all.get("timeOfLastTrade").asInt();
 					final Indicator typeCode = Indicator.valueOf(build.getOptionType().substring(0,1));
-					double timeToExpiry = expiration.toEpochDay() - Instant.ofEpochSecond(timeOfLastTrade)
+					double timeToExpiry = expiration.toEpochDay() - underlying.getLastTrade()
 							.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
 					double riskFreeRate = 0.01;
 					
-					build.setBidIV(BlackScholes.reverse(build.getBid().doubleValue(), typeCode, timeToExpiry, stockPrice, build.getStrikePrice().doubleValue(), riskFreeRate));
-					build.setAskIV(BlackScholes.reverse(build.getAsk().doubleValue(), typeCode, timeToExpiry, stockPrice, build.getStrikePrice().doubleValue(), riskFreeRate));
+					build.setBidIV(BlackScholes.reverse(build.getBid().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build.getStrikePrice().doubleValue(), riskFreeRate));
+					build.setAskIV(BlackScholes.reverse(build.getAsk().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build.getStrikePrice().doubleValue(), riskFreeRate));
 					
 					results.add(build);
 				}

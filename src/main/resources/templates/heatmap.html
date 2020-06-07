@@ -56,6 +56,11 @@
 
 		<p>Implied Volatility Heatmap: Strike Price vs Days To Expiration</p>  
 
+		<p th:inline="text">
+			[[${heatmap.underlying.symbol}]]: [[${#numbers.formatCurrency(heatmap.underlying.price)}]]
+			@ [[${heatmap.underlying.lastTradeTZ}]]
+		</p>
+
 		<!-- table data here-->
 		<div class="row justify-content-center">
 
