@@ -39,8 +39,8 @@ public class Heatmap {
 		this.strikeMap = chains.stream().collect(
 				Collectors.groupingBy(OptionQuote::getStrikePrice, Collectors.groupingBy(OptionQuote::getExpiration)));
 		
-		this.minIV = chains.stream().map(OptionQuote::getIv).filter(x->x!=null).min(Comparator.naturalOrder()).get().doubleValue();
-		this.maxIV = chains.stream().map(OptionQuote::getIv).filter(x->x!=null).max(Comparator.naturalOrder()).get().doubleValue();
+		this.minIV = chains.stream().map(OptionQuote::getIv).filter(x -> x!=null).min(Comparator.naturalOrder()).get().doubleValue();
+		this.maxIV = chains.stream().map(OptionQuote::getIv).filter(x -> x!=null).max(Comparator.naturalOrder()).get().doubleValue();
 	}
 
 	public List<LocalDate> getExpirationDates() {
@@ -76,8 +76,8 @@ public class Heatmap {
 		return expirationMap.keySet().stream().sorted().map(date -> {
 			final List<OptionQuote> dateValues = dates.get(date);
 			if(dateValues != null) {
-				OptionalDouble value = dateValues.stream().map(OptionQuote::getIv).filter(x -> x != null)
-						.mapToDouble(BigDecimal::doubleValue).average();
+				OptionalDouble value = dateValues.stream().mapToDouble(OptionQuote::getIv).filter(x -> x != 0)
+						.average();
 				if(value.isPresent()) {
 					double nValue = (value.getAsDouble() - minIV) / (maxIV - minIV);
 					return new ColorfulValue(value.getAsDouble()*100, getHeatmapColorCSS(nValue));

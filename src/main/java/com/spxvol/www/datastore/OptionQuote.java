@@ -2,7 +2,6 @@ package com.spxvol.www.datastore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +9,10 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OptionQuote {
 
 	@Id @SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000) @GeneratedValue(generator = "optionPairSeqGen") private Long id;
@@ -58,63 +60,26 @@ public class OptionQuote {
 	private String osiKey;
 
 	// OptionGreeks
+	private double rho;
 
-	private BigDecimal rho;
+	private double vega;
 
-	private BigDecimal vega;
+	private double theta;
 
-	private BigDecimal theta;
+	private double delta;
 
-	private BigDecimal delta;
+	private double gamma;
 
-	private BigDecimal gamma;
-
-	private BigDecimal iv;
+	private double iv;
 
 	private boolean currentValue;
 
 	// Computed Values
-	private Double bidIV;
+	private double bidIV;
 
-	private Double askIV;
+	private double askIV;
 
 	public OptionQuote() {
-	}
-
-	public OptionQuote(long uniquePair, String optionCategory, String optionRootSymbol, LocalDate expiration,
-			boolean adjustedFlag, String displaySymbol, String optionType, BigDecimal strikePrice,
-			Underlying underlying, BigDecimal bid, BigDecimal ask, long bidSize, long askSize, String inTheMoney,
-			long volume, int openInterest, BigDecimal netChange, BigDecimal lastPrice, String quoteDetail,
-			String osiKey, BigDecimal rho, BigDecimal vega, BigDecimal theta, BigDecimal delta, BigDecimal gamma,
-			BigDecimal iv, boolean currentValue) {
-		super();
-		this.uniquePair = uniquePair;
-		this.optionCategory = optionCategory;
-		this.optionRootSymbol = optionRootSymbol;
-		this.expiration = expiration;
-		this.adjustedFlag = adjustedFlag;
-		this.displaySymbol = displaySymbol;
-		this.optionType = optionType;
-		this.strikePrice = strikePrice;
-		this.symbol = underlying.getSymbol();
-		this.bid = bid;
-		this.ask = ask;
-		this.bidSize = bidSize;
-		this.askSize = askSize;
-		this.inTheMoney = inTheMoney;
-		this.volume = volume;
-		this.openInterest = openInterest;
-		this.netChange = netChange;
-		this.lastPrice = lastPrice;
-		this.quoteDetail = quoteDetail;
-		this.osiKey = osiKey;
-		this.rho = rho;
-		this.vega = vega;
-		this.theta = theta;
-		this.delta = delta;
-		this.gamma = gamma;
-		this.iv = iv;
-		this.currentValue = currentValue;
 	}
 
 	public long getUniquePair() {
@@ -213,62 +178,6 @@ public class OptionQuote {
 		this.id = id;
 	}
 
-	public BigDecimal getRho() {
-		return rho;
-	}
-
-	public void setRho(BigDecimal rho) {
-		this.rho = rho;
-	}
-
-	public BigDecimal getVega() {
-		return vega;
-	}
-
-	public void setVega(BigDecimal vega) {
-		this.vega = vega;
-	}
-
-	public BigDecimal getTheta() {
-		return theta;
-	}
-
-	public void setTheta(BigDecimal theta) {
-		this.theta = theta;
-	}
-
-	public BigDecimal getDelta() {
-		return delta;
-	}
-
-	public void setDelta(BigDecimal delta) {
-		this.delta = delta;
-	}
-
-	public BigDecimal getGamma() {
-		return gamma;
-	}
-
-	public void setGamma(BigDecimal gamma) {
-		this.gamma = gamma;
-	}
-
-	public BigDecimal getIv() {
-		return iv;
-	}
-
-	public void setIv(BigDecimal iv) {
-		this.iv = iv;
-	}
-
-	public boolean isCurrentValue() {
-		return currentValue;
-	}
-
-	public void setCurrentValue(boolean currentValue) {
-		this.currentValue = currentValue;
-	}
-
 	public void setUniquePair(long uniquePair) {
 		this.uniquePair = uniquePair;
 	}
@@ -353,65 +262,90 @@ public class OptionQuote {
 		return expiration;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(adjustedFlag, ask, askSize, bid, bidSize, currentValue, delta, displaySymbol, gamma, id,
-				inTheMoney, iv, lastPrice, netChange, openInterest, optionCategory, optionRootSymbol, optionType,
-				osiKey, quoteDetail, rho, strikePrice, symbol, theta, expiration, uniquePair, vega, version, volume);
+	public double getRho() {
+		return rho;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		OptionQuote other = (OptionQuote) obj;
-		return adjustedFlag == other.adjustedFlag && Objects.equals(ask, other.ask) && askSize == other.askSize
-				&& Objects.equals(bid, other.bid) && bidSize == other.bidSize && currentValue == other.currentValue
-				&& Objects.equals(delta, other.delta) && Objects.equals(displaySymbol, other.displaySymbol)
-				&& Objects.equals(gamma, other.gamma) && Objects.equals(id, other.id)
-				&& Objects.equals(inTheMoney, other.inTheMoney) && Objects.equals(iv, other.iv)
-				&& Objects.equals(lastPrice, other.lastPrice) && Objects.equals(netChange, other.netChange)
-				&& Objects.equals(openInterest, other.openInterest)
-				&& Objects.equals(optionCategory, other.optionCategory)
-				&& Objects.equals(optionRootSymbol, other.optionRootSymbol)
-				&& Objects.equals(optionType, other.optionType) && Objects.equals(osiKey, other.osiKey)
-				&& Objects.equals(quoteDetail, other.quoteDetail) && Objects.equals(rho, other.rho)
-				&& Objects.equals(strikePrice, other.strikePrice) && Objects.equals(symbol, other.symbol)
-				&& Objects.equals(theta, other.theta) && Objects.equals(expiration, other.expiration)
-				&& uniquePair == other.uniquePair && Objects.equals(vega, other.vega)
-				&& Objects.equals(version, other.version) && volume == other.volume;
+	public void setRho(double rho) {
+		this.rho = rho;
+	}
+
+	public double getVega() {
+		return vega;
+	}
+
+	public void setVega(double vega) {
+		this.vega = vega;
+	}
+
+	public double getTheta() {
+		return theta;
+	}
+
+	public void setTheta(double theta) {
+		this.theta = theta;
+	}
+
+	public double getDelta() {
+		return delta;
+	}
+
+	public void setDelta(double delta) {
+		this.delta = delta;
+	}
+
+	public double getGamma() {
+		return gamma;
+	}
+
+	public void setGamma(double gamma) {
+		this.gamma = gamma;
+	}
+
+	public double getIv() {
+		return iv;
+	}
+
+	public void setIv(double iv) {
+		this.iv = iv;
+	}
+
+	public boolean isCurrentValue() {
+		return currentValue;
+	}
+
+	public void setCurrentValue(boolean currentValue) {
+		this.currentValue = currentValue;
+	}
+
+	public double getBidIV() {
+		return bidIV;
+	}
+
+	public void setBidIV(double bidIV) {
+		this.bidIV = bidIV;
+	}
+
+	public double getAskIV() {
+		return askIV;
+	}
+
+	public void setAskIV(double askIV) {
+		this.askIV = askIV;
 	}
 
 	@Override
 	public String toString() {
-		return String.format(
-				"OptionQuote [id=%s, version=%s, uniquePair=%s, optionCategory=%s, optionRootSymbol=%s, timeStamp=%s, adjustedFlag=%s, displaySymbol=%s, optionType=%s, strikePrice=%s, symbol=%s, bid=%s, ask=%s, bidSize=%s, askSize=%s, inTheMoney=%s, volume=%s, openInterest=%s, netChange=%s, lastPrice=%s, quoteDetail=%s, osiKey=%s, rho=%s, vega=%s, theta=%s, delta=%s, gamma=%s, iv=%s, currentValue=%s]",
-				id, version, uniquePair, optionCategory, optionRootSymbol, expiration, adjustedFlag, displaySymbol,
-				optionType, strikePrice, symbol, bid, ask, bidSize, askSize, inTheMoney, volume, openInterest,
-				netChange, lastPrice, quoteDetail, osiKey, rho, vega, theta, delta, gamma, iv, currentValue);
+		return displaySymbol;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return this.displaySymbol.equals(obj.toString());
 	}
 
-	public Double getBidIV() {
-		return bidIV;
+	@Override
+	public int hashCode() {
+		return displaySymbol.hashCode();
 	}
-
-	public void setBidIV(Double bidIV) {
-		this.bidIV = bidIV;
-	}
-
-	public Double getAskIV() {
-		return askIV;
-	}
-
-	public void setAskIV(Double askIV) {
-		this.askIV = askIV;
-	}
-
 }

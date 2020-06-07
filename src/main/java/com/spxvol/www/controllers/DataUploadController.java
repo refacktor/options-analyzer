@@ -1,11 +1,9 @@
 package com.spxvol.www.controllers;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.springframework.http.HttpStatus;
@@ -64,39 +62,34 @@ public class DataUploadController {
 				for(JsonNode optionNode: optionPairNodes) {
 					final String symbol1 = optionNode.get("symbol").asText();
 					Underlying underlying = dataUploadService.underlying(symbol1);
-					
-					JsonNode optionGreeksNode = optionNode.get("OptionGreeks");
-					Function<String, BigDecimal> greek = field -> {
-						final double asDouble = optionGreeksNode.get(field).asDouble();
-						return asDouble < 0.0 || asDouble > 1.0 ? null : BigDecimal.valueOf(asDouble);
-					};
-					final String optionType = optionNode.get("optionType").asText();
-					final double bid = optionNode.get("bid").asDouble();
-					final double ask = optionNode.get("ask").asDouble();
-					final double strike = optionNode.get("strikePrice").asDouble();
-					final OptionQuote build = new OptionQuote(uniquePair, optionNode.get("optionCategory").asText(),
-					optionNode.get("optionRootSymbol").asText(), expiration, optionNode.get("adjustedFlag").asBoolean(),
-					optionNode.get("displaySymbol").asText(), optionType,
-					BigDecimal.valueOf(strike), underlying,
-					BigDecimal.valueOf(bid), BigDecimal.valueOf(ask),
-					optionNode.get("bidSize").asLong(), optionNode.get("askSize").asLong(), optionNode.get("inTheMoney").asText(),
-					optionNode.get("volume").asLong(), optionNode.get("openInterest").asInt(),
-					BigDecimal.valueOf(optionNode.get("netChange").asDouble()),
-					BigDecimal.valueOf(optionNode.get("lastPrice").asDouble()), optionNode.get("quoteDetail").asText(),
-					optionNode.get("osiKey").asText(), greek.apply("rho"), greek.apply("vega"), greek.apply("theta"),
-					greek.apply("delta"), greek.apply("gamma"), greek.apply("iv"),
-					optionGreeksNode.get("currentValue").asBoolean());
+
+					OptionQuote build = mapper.convertValue(optionNode, OptionQuote.class);
+					build.setUniquePair(uniquePair);
+					build.setExpiration(expiration);
+				
+					JsonNode greeks = optionNode.get("OptionGreeks");
+					build.setRho(greeks.get("rho").asDouble(0));
+					build.setVega(greeks.get("vega").asDouble(0));
+					build.setTheta(greeks.get("theta").asDouble(0));
+					build.setDelta(greeks.get("delta").asDouble(0));
+					build.setGamma(greeks.get("gamma").asDouble(0));
+					build.setIv(greeks.get("iv").asDouble(0));
+					build.setCurrentValue(greeks.get("currentValue").asBoolean());
+                     
+					if(build.getIv() < 0.0) {
+						build.setIv(0.0);
+					}
 					
 					final JsonNode all = rootNode.get("stock").get("All");
 					final double stockPrice = all.get("lastTrade").asDouble();
 					int timeOfLastTrade = all.get("timeOfLastTrade").asInt();
-					final Indicator typeCode = Indicator.valueOf(optionType.substring(0,1));
+					final Indicator typeCode = Indicator.valueOf(build.getOptionType().substring(0,1));
 					double timeToExpiry = expiration.toEpochDay() - Instant.ofEpochSecond(timeOfLastTrade)
 							.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
 					double riskFreeRate = 0.01;
 					
-					build.setBidIV(BlackScholes.reverse(bid, typeCode, timeToExpiry, stockPrice, strike, riskFreeRate));
-					build.setAskIV(BlackScholes.reverse(ask, typeCode, timeToExpiry, stockPrice, strike, riskFreeRate));
+					build.setBidIV(BlackScholes.reverse(build.getBid().doubleValue(), typeCode, timeToExpiry, stockPrice, build.getStrikePrice().doubleValue(), riskFreeRate));
+					build.setAskIV(BlackScholes.reverse(build.getAsk().doubleValue(), typeCode, timeToExpiry, stockPrice, build.getStrikePrice().doubleValue(), riskFreeRate));
 					
 					results.add(build);
 				}
