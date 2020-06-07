@@ -6,43 +6,48 @@ import org.apache.commons.math3.special.Erf;
 
 public class BlackScholes {
 	private static final long N_MAX = 1000;
-	private static final double a = 1e-9;
 	private static final double TOLERANCE = 1e-9;
-	private static final double b = 10;
 
-	private double value;
-	private Indicator indicator;
-	private double t;
-	private double sT;
-	private double k;
-	private double r;
+	private double a = 1e-9;
+	private double b = 10 + TOLERANCE;
+
+	final private double callValue;
+	final private Indicator indicator;
+	final private double timeToExpiry;
+	final private double underlyingSpotPrice;
+	final private double strikePrice;
+	final private double riskFreeRate;
 
 	public static double reverse(double optionPrice, Indicator optionType, double timeToExpiry, double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
 		BlackScholes bs = new BlackScholes(optionPrice, optionType, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
-		return bs.reverse();
+		return bs.getReverseBlackScholes();
 	}
 	
 	protected BlackScholes(double optionPrice, Indicator optionType, double timeToExpiry, double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
-		this.value = optionPrice;
 		this.indicator = optionType;
-		this.t = timeToExpiry;
-		this.sT = underlyingSpotPrice;
-		this.k = strikePrice;
-		this.r = riskFreeRate;
-	}
-
-	protected double reverse() {
-		t = t / 365;
-		value = getPValue(value, indicator, t, sT, k, r);
-
-		if (a >= b || (sign(f(a)) == sign(f(b)))) {
-			return NO_SOLUTION.getValue();
+		this.timeToExpiry = timeToExpiry / 365;
+		this.underlyingSpotPrice = underlyingSpotPrice;
+		this.strikePrice = strikePrice;
+		this.riskFreeRate = riskFreeRate;
+		
+		if (indicator == Indicator.P && optionPrice != 0) {
+			// put-call parity
+			this.callValue = optionPrice - strikePrice * Math.exp(-riskFreeRate * timeToExpiry) + underlyingSpotPrice;
 		}
-
-		return getReverseBlackScholes(a, b);
+		else {
+			this.callValue = optionPrice;			
+		}
 	}
-	
-	private double getReverseBlackScholes(double a, double b) {
+
+	protected double getReverseBlackScholes() {
+		
+		if(callValue == 0) {
+			return 0;
+		}
+		if(sign(f(a)) == sign(f(b))) {
+			return 0;
+		}
+		
 		int n = 0;
 		while (n < N_MAX) {
 			double c = (a + b) / 2;
@@ -62,9 +67,9 @@ public class BlackScholes {
 	}
 
 	private double f(double sigma) {
-		double d1 = (Math.log(sT / k) + (r + Math.pow(sigma, 2) / 2.0) * t) / (sigma * Math.sqrt(t));
-		double d2 = d1 - sigma * Math.sqrt(t);
-		return n(d1) * sT - n(d2) * k * Math.exp(-r * t) - value;
+		double d1 = (Math.log(underlyingSpotPrice / strikePrice) + (riskFreeRate + Math.pow(sigma, 2) / 2.0) * timeToExpiry) / (sigma * Math.sqrt(timeToExpiry));
+		double d2 = d1 - sigma * Math.sqrt(timeToExpiry);
+		return n(d1) * underlyingSpotPrice - n(d2) * strikePrice * Math.exp(-riskFreeRate * timeToExpiry) - callValue;
 	}
 
 	private double n(double x) {
@@ -72,13 +77,6 @@ public class BlackScholes {
 	}
 
 	
-	private double getPValue(double value, Indicator indicator, double t, double sT, double k, double r) {
-		if (indicator == Indicator.P) {
-			value = value - k * Math.exp(-r * t) + sT;
-		}
-		return value;
-	}
-
 	private double sign(double x) {
 		return Math.signum(x);
 	}
