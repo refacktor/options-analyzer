@@ -32,7 +32,8 @@ public class BlackScholes {
 		
 		if (indicator == Indicator.P && optionPrice != 0) {
 			// put-call parity
-			this.callValue = optionPrice - strikePrice * Math.exp(-riskFreeRate * timeToExpiry) + underlyingSpotPrice;
+			final double adjustedStrike = strikePrice * Math.exp(-this.riskFreeRate * this.timeToExpiry);
+			this.callValue = optionPrice - adjustedStrike + this.underlyingSpotPrice;
 		}
 		else {
 			this.callValue = optionPrice;			
@@ -44,7 +45,7 @@ public class BlackScholes {
 		if(callValue == 0) {
 			return 0;
 		}
-		if(sign(f(a)) == sign(f(b))) {
+		if(a >= b || sign(f(a)) == sign(f(b))) {
 			return 0;
 		}
 		
