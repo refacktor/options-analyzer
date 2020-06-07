@@ -3,6 +3,8 @@ package com.spxvol.www.datastore;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -80,6 +82,14 @@ public class OptionQuote {
 	private double askIV;
 
 	public OptionQuote() {
+	}
+	
+	@Access(AccessType.PROPERTY)
+	public double getProbability() {
+		return Math.abs(delta);
+	}
+	
+	public void setProbability(double computed) {
 	}
 
 	public long getUniquePair() {

@@ -80,15 +80,13 @@ public class OptionQuoteService {
 		final List<String> symbols = Arrays.asList(params.getSymbols().split("[\\s\\,]+"));
 		Predicate predicate = from.get("symbol").in(symbols);
 	
-		if(params.getMinDelta() != null) {
-			predicate = cb.and(predicate,
-					cb.or(cb.greaterThan(from.get("delta"), params.getMinDelta()),
-			              cb.lessThan(from.get("delta"), -params.getMinDelta())));
+		if(params.getMinProbability() != null) {
+			predicate = cb.and(predicate, 
+							cb.greaterThan(from.get("probability"), params.getMinProbability()));
 		}
-		if(params.getMaxDelta() != null) {
-			predicate = cb.and(predicate,
-					cb.and(cb.lessThan(from.get("delta"), params.getMaxDelta()),
-			               cb.greaterThan(from.get("delta"), -params.getMaxDelta())));
+		if(params.getMaxProbability() != null) {
+			predicate = cb.and(predicate, 
+							cb.lessThan(from.get("probability"), params.getMaxProbability()));
 		}
 	
 		if(params.getMinDays() != null) {

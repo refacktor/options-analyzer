@@ -27,11 +27,11 @@ public class ScreenerController {
 		if (params.getSymbols() == null) {
 			params.setSymbols("SPX");
 		}
-		if (params.getMinDelta() == null) {
-			params.setMinDelta((float) 0.333);
+		if (params.getMinProbability() == null) {
+			params.setMinProbability((float) 0.333);
 		}
-		if (params.getMaxDelta() == null) {
-			params.setMaxDelta((float) 0.666);
+		if (params.getMaxProbability() == null) {
+			params.setMaxProbability((float) 0.666);
 		}
 		if (params.getMinDays() == null) {
 			params.setMinDays(0);
