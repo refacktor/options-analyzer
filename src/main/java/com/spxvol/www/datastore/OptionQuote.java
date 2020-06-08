@@ -18,17 +18,7 @@ public class OptionQuote {
 
 	@Id @SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000) @GeneratedValue(generator = "optionPairSeqGen") private Long id;
 
-	@Version private Integer version;
-
-	private long uniquePair;
-
-	private String optionCategory;
-
-	private String optionRootSymbol;
-
 	private LocalDate expiration;
-
-	private boolean adjustedFlag;
 
 	private String displaySymbol;
 
@@ -56,8 +46,6 @@ public class OptionQuote {
 
 	private Double lastPrice;
 
-	private String quoteDetail;
-
 	private String osiKey;
 
 	// OptionGreeks
@@ -72,8 +60,6 @@ public class OptionQuote {
 	private double gamma;
 
 	private double iv;
-
-	private boolean currentValue;
 
 	// Computed Values
 	private double bidIV;
@@ -91,32 +77,8 @@ public class OptionQuote {
 	public void setProbability(double computed) {
 	}
 
-	public long getUniquePair() {
-		return uniquePair;
-	}
-
-	public Integer getVersion() {
-		return version;
-	}
-
-	public void setVersion(Integer version) {
-		this.version = version;
-	}
-
-	public String getOptionCategory() {
-		return optionCategory;
-	}
-
-	public String getOptionRootSymbol() {
-		return optionRootSymbol;
-	}
-
 	public LocalDate getExpiration() {
 		return expiration;
-	}
-
-	public boolean isAdjustedFlag() {
-		return adjustedFlag;
 	}
 
 	public String getDisplaySymbol() {
@@ -171,10 +133,6 @@ public class OptionQuote {
 		return lastPrice;
 	}
 
-	public String getQuoteDetail() {
-		return quoteDetail;
-	}
-
 	public String getOsiKey() {
 		return osiKey;
 	}
@@ -187,24 +145,8 @@ public class OptionQuote {
 		this.id = id;
 	}
 
-	public void setUniquePair(long uniquePair) {
-		this.uniquePair = uniquePair;
-	}
-
-	public void setOptionCategory(String optionCategory) {
-		this.optionCategory = optionCategory;
-	}
-
-	public void setOptionRootSymbol(String optionRootSymbol) {
-		this.optionRootSymbol = optionRootSymbol;
-	}
-
 	public void setExpiration(LocalDate expiration) {
 		this.expiration = expiration;
-	}
-
-	public void setAdjustedFlag(boolean adjustedFlag) {
-		this.adjustedFlag = adjustedFlag;
 	}
 
 	public void setDisplaySymbol(String displaySymbol) {
@@ -257,10 +199,6 @@ public class OptionQuote {
 
 	public void setLastPrice(Double lastPrice) {
 		this.lastPrice = lastPrice;
-	}
-
-	public void setQuoteDetail(String quoteDetail) {
-		this.quoteDetail = quoteDetail;
 	}
 
 	public void setOsiKey(String osiKey) {
@@ -317,14 +255,6 @@ public class OptionQuote {
 
 	public void setIv(double iv) {
 		this.iv = iv;
-	}
-
-	public boolean isCurrentValue() {
-		return currentValue;
-	}
-
-	public void setCurrentValue(boolean currentValue) {
-		this.currentValue = currentValue;
 	}
 
 	public double getBidIV() {

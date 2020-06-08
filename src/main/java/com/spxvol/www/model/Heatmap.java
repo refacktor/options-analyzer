@@ -1,6 +1,5 @@
 package com.spxvol.www.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -77,7 +76,7 @@ public class Heatmap {
 		return String.format("hsl(%.2f, %.2f%%, %.2f%%)", h, s, l);
 	}
 	
-	public List<ColorfulValue> row(BigDecimal strike) {
+	public List<ColorfulValue> row(Double strike) {
 		Map<LocalDate, List<OptionQuote>> dates = strikeMap.get(strike);
 		
 		return expirationMap.keySet().stream().sorted().map(date -> {

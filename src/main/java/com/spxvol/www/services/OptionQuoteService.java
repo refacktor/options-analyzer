@@ -48,14 +48,14 @@ public class OptionQuoteService {
 		this.optionQuoteRepository = optionQuoteRepository;
 	}
 
-	public Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap(String symbol) {
+	public Map<LocalDate, Map<String, Map<String, List<OptionQuote>>>> chainMap(String symbol) {
 		List<OptionQuote> chains = optionQuoteRepository
 				.findBySymbol(underlyingRepository.findById(symbol.toUpperCase()).get().getSymbol());
 		Comparator<OptionQuote> strikePriceComparator = (o1, o2) -> o1.getStrikePrice().compareTo(o2.getStrikePrice());
 		Comparator<OptionQuote> dateTimeComparator = (o1, o2) -> o1.getExpiration().compareTo(o2.getExpiration());
-		Map<LocalDate, Map<Long, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
+		Map<LocalDate, Map<String, Map<String, List<OptionQuote>>>> chainMap = chains.stream()
 				.sorted(strikePriceComparator).sorted(dateTimeComparator)
-				.collect(groupingBy(OptionQuote::getDate, LinkedHashMap::new, groupingBy(OptionQuote::getUniquePair,
+				.collect(groupingBy(OptionQuote::getDate, LinkedHashMap::new, groupingBy(o -> o.getExpiration() + " " + o.getStrikePrice(),
 						LinkedHashMap::new, groupingBy(OptionQuote::getOptionType))));
 		return chainMap;
 	}
@@ -82,11 +82,11 @@ public class OptionQuoteService {
 	
 		if(params.getMinProbability() != null) {
 			predicate = cb.and(predicate, 
-							cb.greaterThan(from.get("probability"), params.getMinProbability()));
+							cb.greaterThanOrEqualTo(from.get("probability"), params.getMinProbability()));
 		}
 		if(params.getMaxProbability() != null) {
 			predicate = cb.and(predicate, 
-							cb.lessThan(from.get("probability"), params.getMaxProbability()));
+							cb.lessThanOrEqualTo(from.get("probability"), params.getMaxProbability()));
 		}
 	
 		if(params.getMinDays() != null) {

@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 class UploadSampleDataToApplication {
 
-	private static final String HTTP_LOCALHOST_PUT_DATA = "http://localhost:5000/putData";
+	private static final String HTTP_LOCALHOST_PUT_DATA = "http://localhost:5000/internal/upload";
 
 	public static void main(String[] args) throws Exception {
 		File dir = new File("src/test/resources/etrade");

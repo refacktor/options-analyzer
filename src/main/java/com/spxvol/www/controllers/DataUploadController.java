@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.fasterxml.uuid.Generators;
 import com.spxvol.math.BlackScholes;
 import com.spxvol.math.BlackScholes.Indicator;
 import com.spxvol.www.datastore.OptionQuote;
@@ -42,7 +41,7 @@ public class DataUploadController {
 		this.dataUploadService = dataUploadService;
 	}
 
-	@PostMapping("/putData")
+	@PostMapping("/internal/upload")
 	public ResponseEntity<String> upload(@RequestBody String json) throws Exception {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
@@ -63,12 +62,10 @@ public class DataUploadController {
 					expirationNode.get("month").asInt(), expirationNode.get("day").asInt());
 		
 			optionChainResponseNode.withArray("OptionPair").elements().forEachRemaining(optionPairNode -> {
-				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
 				JsonNode[] optionPairNodes = { optionPairNode.get("Call"), optionPairNode.get("Put") };
 				for(JsonNode optionNode: optionPairNodes) {
 
 					OptionQuote build = mapper.convertValue(optionNode, OptionQuote.class);
-					build.setUniquePair(uniquePair);
 					build.setExpiration(expiration);
 				
 					JsonNode greeks = optionNode.get("OptionGreeks");
@@ -78,7 +75,6 @@ public class DataUploadController {
 					build.setDelta(greeks.get("delta").asDouble(0));
 					build.setGamma(greeks.get("gamma").asDouble(0));
 					build.setIv(greeks.get("iv").asDouble(0));
-					build.setCurrentValue(greeks.get("currentValue").asBoolean());
                      
 					if(build.getIv() < 0.0) {
 						build.setIv(0.0);
@@ -104,7 +100,7 @@ public class DataUploadController {
 		return new ResponseEntity<String>("data uploaded successfully for symbol " + symbol, HttpStatus.OK);
 	}
 
-	@PostMapping("/putDataV2")
+	@PostMapping("/internal/uploadV2")
 	public ResponseEntity<String> upload(@RequestBody StandardQuote data) throws Exception {
 		String symbol = data.getUnderlying().getSymbol();
 		Underlying underlying = dataUploadService.underlying(symbol);

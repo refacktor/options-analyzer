@@ -21,15 +21,16 @@ import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.model.StandardQuote;
 
 @Controller
-public class YahooDataSource {
+public class YahooDataSource implements OptionsDataSource {
 
 	private final Logger logger = Logger.getLogger(getClass().getName());
 	
 	private static final String url = "https://query2.finance.yahoo.com/v7/finance/options/{symbol}";
 
 	private RestTemplate rt = new RestTemplate();
-	
-	@GetMapping("/data/yahoo/{stock}")
+
+	@Override
+	@GetMapping("/internal/yahoo-debug/{stock}")
 	@ResponseBody
 	public StandardQuote getQuote(@PathVariable("stock") String stock) {
 		final String yahooSymbol = stock.equals("SPX") ? "^" + stock : stock;
@@ -52,10 +53,9 @@ public class YahooDataSource {
 		underlying.setPrice(result.getQuote().getRegularMarketPrice());
 		underlying.setLastTrade(Instant.ofEpochSecond(result.getQuote().getRegularMarketTime()));
 		standardQuote.setUnderlying(underlying);
-		ZoneId tz = ZoneId.of(result.getQuote().getExchangeTimezoneName());
 		
 		List<OptionQuote> options = result.getOptions().stream().flatMap(in -> {
-			final LocalDate expirationDate = Instant.ofEpochSecond(in.getExpirationDate()).atZone(tz).toLocalDate();
+			final LocalDate expirationDate = Instant.ofEpochSecond(in.getExpirationDate()).atZone(ZoneId.of("UTC")).toLocalDate();
 			Stream<OptionQuote> callStream = in.getCalls().stream().map(o -> {
 				OptionQuote out = new OptionQuote();
 				out.setOptionType("CALL");
@@ -68,6 +68,8 @@ public class YahooDataSource {
 				out.setOpenInterest(o.getOpenInterest() != null ? o.getOpenInterest() : 0);
 				out.setBid(o.getBid());
 				out.setAsk(o.getAsk());
+				out.setDisplaySymbol(o.getContractSymbol());
+				out.setSymbol(stock);
 				return out;
 			});
 			Stream<OptionQuote> putStream = in.getCalls().stream().map(o -> {
@@ -82,6 +84,8 @@ public class YahooDataSource {
 				out.setOpenInterest(o.getOpenInterest() != null ? o.getOpenInterest() : 0);
 				out.setBid(o.getBid());
 				out.setAsk(o.getAsk());
+				out.setDisplaySymbol(o.getContractSymbol());
+				out.setSymbol(stock);
 				return out;
 			});
 			return Stream.of(callStream,putStream).flatMap(stream->stream);

@@ -12,7 +12,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-          .antMatchers("/putData").hasIpAddress("127.0.0.1")
+          .antMatchers("/internal/upload").hasIpAddress("127.0.0.1")
           .anyRequest().permitAll();
     }
  
