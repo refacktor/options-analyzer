@@ -34,4 +34,5 @@ public class BlackScholesTest {
 		final BlackScholes blackScholes = new BlackScholes(14, Indicator.P, 35, 0, 250, 0.02);
 		Assertions.assertEquals(0, blackScholes.getReverseBlackScholes(), TOLERANCE);
 	}
+	
 }
