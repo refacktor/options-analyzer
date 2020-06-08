@@ -16,9 +16,9 @@ public class Heatmap {
 
 	private List<OptionQuote> chains;
 
-	private Map<LocalDate, Map<BigDecimal, List<OptionQuote>>> expirationMap;
+	private Map<LocalDate, Map<Double, List<OptionQuote>>> expirationMap;
 
-	private Map<BigDecimal, Map<LocalDate, List<OptionQuote>>> strikeMap;
+	private Map<Double, Map<LocalDate, List<OptionQuote>>> strikeMap;
 
 	private double minIV;
 
@@ -31,7 +31,7 @@ public class Heatmap {
 		chains.removeIf(o -> o.getDate().equals(underlying.getLastTradeTZ().toLocalDate()));
 
 		if (skipStrikes) {
-			Map<BigDecimal, List<OptionQuote>> datesByStrike = chains.stream()
+			Map<Double, List<OptionQuote>> datesByStrike = chains.stream()
 					.collect(Collectors.groupingBy(OptionQuote::getStrikePrice));
 			int maxDates = datesByStrike.values().stream().map(List::size).max(Comparator.naturalOrder()).get();
 			chains = datesByStrike.values().stream().filter(list -> list.size() == maxDates).flatMap(List::stream)
@@ -60,7 +60,7 @@ public class Heatmap {
 				.collect(Collectors.toList());
 	}
 
-	public List<BigDecimal> getStrikes() {
+	public List<Double> getStrikes() {
 		return chains.stream().map(OptionQuote::getStrikePrice).distinct().sorted().collect(Collectors.toList());
 	}
 	

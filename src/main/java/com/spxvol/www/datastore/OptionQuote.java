@@ -1,6 +1,5 @@
 package com.spxvol.www.datastore;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javax.persistence.Access;
@@ -35,13 +34,13 @@ public class OptionQuote {
 
 	private String optionType;
 
-	private BigDecimal strikePrice;
+	private Double strikePrice;
 
 	private String symbol;
 
-	private BigDecimal bid;
+	private Double bid;
 
-	private BigDecimal ask;
+	private Double ask;
 
 	private long bidSize;
 
@@ -53,9 +52,9 @@ public class OptionQuote {
 
 	private int openInterest;
 
-	private BigDecimal netChange;
+	private Double netChange;
 
-	private BigDecimal lastPrice;
+	private Double lastPrice;
 
 	private String quoteDetail;
 
@@ -128,7 +127,7 @@ public class OptionQuote {
 		return optionType;
 	}
 
-	public BigDecimal getStrikePrice() {
+	public Double getStrikePrice() {
 		return strikePrice;
 	}
 
@@ -136,11 +135,11 @@ public class OptionQuote {
 		return symbol;
 	}
 
-	public BigDecimal getBid() {
+	public Double getBid() {
 		return bid;
 	}
 
-	public BigDecimal getAsk() {
+	public Double getAsk() {
 		return ask;
 	}
 
@@ -164,11 +163,11 @@ public class OptionQuote {
 		return openInterest;
 	}
 
-	public BigDecimal getNetChange() {
+	public Double getNetChange() {
 		return netChange;
 	}
 
-	public BigDecimal getLastPrice() {
+	public Double getLastPrice() {
 		return lastPrice;
 	}
 
@@ -216,7 +215,7 @@ public class OptionQuote {
 		this.optionType = optionType;
 	}
 
-	public void setStrikePrice(BigDecimal strikePrice) {
+	public void setStrikePrice(Double strikePrice) {
 		this.strikePrice = strikePrice;
 	}
 
@@ -224,11 +223,11 @@ public class OptionQuote {
 		this.symbol = symbol;
 	}
 
-	public void setBid(BigDecimal bid) {
+	public void setBid(Double bid) {
 		this.bid = bid;
 	}
 
-	public void setAsk(BigDecimal ask) {
+	public void setAsk(Double ask) {
 		this.ask = ask;
 	}
 
@@ -252,11 +251,11 @@ public class OptionQuote {
 		this.openInterest = openInterest;
 	}
 
-	public void setNetChange(BigDecimal netChange) {
+	public void setNetChange(Double netChange) {
 		this.netChange = netChange;
 	}
 
-	public void setLastPrice(BigDecimal lastPrice) {
+	public void setLastPrice(Double lastPrice) {
 		this.lastPrice = lastPrice;
 	}
 

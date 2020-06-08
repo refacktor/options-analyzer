@@ -31,7 +31,7 @@ class OptionQuoteServiceTest {
 	public void loadData() throws Exception {
 		if(!init) {
 			String json = Files.contentOf(new File("src/test/resources/etrade/SPX.json"), "utf-8");
-			uploader.uploadDataFromEtradeAPI(json);
+			uploader.upload(json);
 			init = true;
 		}
 	}

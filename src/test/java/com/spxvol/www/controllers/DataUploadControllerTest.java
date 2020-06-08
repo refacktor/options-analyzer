@@ -40,7 +40,7 @@ class DataUploadControllerTest {
 
 	private void loadData(final String pathname) throws Exception {
 		String json = Files.contentOf(new File(pathname), "utf-8");
-		ResponseEntity<String> out = target.uploadDataFromEtradeAPI(json);
+		ResponseEntity<String> out = target.upload(json);
 		System.out.println(pathname + ": " + out);
 	}
 

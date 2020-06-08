@@ -24,6 +24,7 @@ import com.spxvol.math.BlackScholes.Indicator;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.model.Constants;
+import com.spxvol.www.model.StandardQuote;
 import com.spxvol.www.services.DataUploadService;
 
 @Controller
@@ -42,7 +43,7 @@ public class DataUploadController {
 	}
 
 	@PostMapping("/putData")
-	public ResponseEntity<String> uploadDataFromEtradeAPI(@RequestBody String json) throws Exception {
+	public ResponseEntity<String> upload(@RequestBody String json) throws Exception {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
 		final JsonNode all = rootNode.get("stock").get("All");
@@ -97,6 +98,38 @@ public class DataUploadController {
 		});
 		final List<OptionQuote> quotes = results;
 		dataUploadService.saveAll(symbol, quotes);
+		long endTime = System.currentTimeMillis();
+		long runningTime = endTime - startTime;
+		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
+		return new ResponseEntity<String>("data uploaded successfully for symbol " + symbol, HttpStatus.OK);
+	}
+
+	@PostMapping("/putDataV2")
+	public ResponseEntity<String> upload(@RequestBody StandardQuote data) throws Exception {
+		String symbol = data.getUnderlying().getSymbol();
+		Underlying underlying = dataUploadService.underlying(symbol);
+		underlying.setLastTrade(data.getUnderlying().getLastTrade());
+		underlying.setPrice(data.getUnderlying().getPrice());
+		
+		System.out.println(" start uploading data for symbol " + symbol);
+		long startTime = System.currentTimeMillis();
+		List<OptionQuote> results = new ArrayList<>();
+		data.getOptions().forEach(option -> {
+			
+			final Indicator typeCode = Indicator.valueOf(option.getOptionType().substring(0,1));
+			double timeToExpiry = option.getExpiration().toEpochDay() - underlying.getLastTrade()
+					.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
+			double riskFreeRate = 0.01;
+			
+			if(option.getBid() != null)
+				option.setBidIV(BlackScholes.reverse(option.getBid(), typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate));
+			
+			if(option.getAsk() != null)
+				option.setAskIV(BlackScholes.reverse(option.getAsk(), typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate));
+			
+			results.add(option);
+		});
+		dataUploadService.saveAll(symbol, results);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
