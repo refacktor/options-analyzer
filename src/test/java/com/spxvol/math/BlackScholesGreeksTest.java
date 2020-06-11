@@ -11,6 +11,19 @@ public class BlackScholesGreeksTest {
 	private static final double TOLERANCE = 1e-9;
 	
 	@Test
+	public void testCHK() {
+		final int timeToExpiry = 7;
+		final double underlyingSpotPrice = 16.81;
+		final int strikePrice = 21;
+		final double riskFreeRate = 0.01;
+		final double optionPrice = 2.60;
+		double iv = BlackScholes.reverse(optionPrice, Indicator.C, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
+		Assertions.assertEquals(4.27, iv, 0.01);
+		OptionGreeks optionGreeks = BlackScholesGreeks.getOptionGreeks(Indicator.C, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate, iv);
+		Assertions.assertEquals(0.438, optionGreeks.getDelta());
+	}
+	
+	@Test
 	public void testOptionGreeksWithCIndictor() {
 		final BlackScholesGreeks blackScholes = new BlackScholesGreeks(Indicator.C, 0.34, 56.25, 55, 0.0285);
 		OptionGreeks optionGreeks = blackScholes.getOptionGreeks(Indicator.C, 0.28);
