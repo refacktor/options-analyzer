@@ -6,17 +6,17 @@ import org.apache.commons.math3.special.Erf;
 
 public class BlackScholes {
 	private static final long N_MAX = 1000;
-	private static final double TOLERANCE = 1e-9;
+	public static final double TOLERANCE = 1e-9;
 
 	private double a = 1e-9;
 	private double b = 10 + TOLERANCE;
 
 	final private double callValue;
 	final private Indicator indicator;
-	final private double timeToExpiry;
-	final private double underlyingSpotPrice;
-	final private double strikePrice;
-	final private double riskFreeRate;
+	final protected double timeToExpiry;
+	final protected double underlyingSpotPrice;
+	final protected double strikePrice;
+	final protected double riskFreeRate;
 
 	public static double reverse(double optionPrice, Indicator optionType, double timeToExpiry,
 			double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
@@ -25,6 +25,11 @@ public class BlackScholes {
 		return bs.getReverseBlackScholes();
 	}
 
+	protected BlackScholes(Indicator optionType, double timeToExpiry, double underlyingSpotPrice,
+			double strikePrice, double riskFreeRate) {
+		this(0.0, optionType, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
+	}
+	
 	protected BlackScholes(double optionPrice, Indicator optionType, double timeToExpiry, double underlyingSpotPrice,
 			double strikePrice, double riskFreeRate) {
 		this.indicator = optionType;
@@ -79,9 +84,8 @@ public class BlackScholes {
 	}
 
 	protected double d1(double sigma) {
-		double top = Math.log(underlyingSpotPrice / strikePrice)
-				+ (riskFreeRate + Math.pow(sigma, 2) / 2.0) * timeToExpiry;
-		double bottom = (sigma * Math.sqrt(timeToExpiry));
+		double top = Math.log(underlyingSpotPrice / strikePrice) + (riskFreeRate + Math.pow(sigma, 2) / 2) * timeToExpiry;
+		double bottom = sigma * Math.sqrt(timeToExpiry);
 		return top / bottom;
 	}
 

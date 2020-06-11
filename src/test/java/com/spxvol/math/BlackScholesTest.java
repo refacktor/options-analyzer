@@ -13,14 +13,12 @@ public class BlackScholesTest {
 	public void testInTheMoneyCall() {
 		final BlackScholes blackScholes = new BlackScholes(2934.70, Indicator.C, 19, 3044.31, 100, 0.02);
 		Assertions.assertEquals(0, blackScholes.getReverseBlackScholes(), TOLERANCE);
-
 	}
 
 	@Test
 	public void testWithPIndicator() {
 		final BlackScholes blackScholes = new BlackScholes(14, Indicator.P, 35, 236.9, 250, 0.02);
 		Assertions.assertEquals(0.1847963015818032, blackScholes.getReverseBlackScholes(), TOLERANCE);
-
 	}
 
 	@Test
@@ -34,5 +32,4 @@ public class BlackScholesTest {
 		final BlackScholes blackScholes = new BlackScholes(14, Indicator.P, 35, 0, 250, 0.02);
 		Assertions.assertEquals(0, blackScholes.getReverseBlackScholes(), TOLERANCE);
 	}
-	
 }
