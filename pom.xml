@@ -119,7 +119,7 @@
 					<sourceType>json</sourceType>
 					<dateType>java.time.LocalDate</dateType>
 					<dateTimeType>java.time.LocalDateTime</dateTimeType>
-
+					<useLongIntegers>true</useLongIntegers>
 				</configuration>
 				<executions>
 					<execution>

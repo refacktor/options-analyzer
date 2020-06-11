@@ -82,6 +82,11 @@
 
 			</form>
 
+			<p th:inline="text" th:each="underlying: ${underlyings}">
+				[[${underlying.symbol}]]: [[${#numbers.formatCurrency(underlying.price)}]]
+				@ [[${underlying.lastTradeTZ}]]
+			</p>
+
 			<table class="table table-sm table-bordered calls">
 				<thead>
 					<tr>

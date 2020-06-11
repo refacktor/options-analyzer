@@ -77,7 +77,7 @@ public class OptionQuoteService {
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
 		final CriteriaQuery<OptionQuote> cq = cb.createQuery(OptionQuote.class);
 		final Root<OptionQuote> from = cq.from(OptionQuote.class);
-		final List<String> symbols = Arrays.asList(params.getSymbols().split("[\\s\\,]+"));
+		final List<String> symbols = Arrays.asList(params.getSymbols().toUpperCase().split("[\\s\\,]+"));
 		Predicate predicate = from.get("symbol").in(symbols);
 	
 		if(params.getMinProbability() != null) {

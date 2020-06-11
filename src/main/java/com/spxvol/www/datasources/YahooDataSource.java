@@ -36,7 +36,7 @@ public class YahooDataSource implements OptionsDataSource {
 		final String yahooSymbol = stock.equals("SPX") ? "^" + stock : stock;
 		YahooSchema frontOption = rt.getForObject(url, YahooSchema.class, yahooSymbol);
 		
-		final List<Integer> expirationDates = frontOption.getOptionChain().getResult().get(0).getExpirationDates();
+		final List<Long> expirationDates = frontOption.getOptionChain().getResult().get(0).getExpirationDates();
 		Stream<OptionQuote> backOptions = expirationDates.subList(1, expirationDates.size()).stream().flatMap(date -> {
 			YahooSchema backOption = rt.getForObject(url + "?date={date}", YahooSchema.class, yahooSymbol, date);
 			return convert(stock, backOption).getOptions().stream();
@@ -65,7 +65,7 @@ public class YahooDataSource implements OptionsDataSource {
 				out.setVolume(o.getVolume() != null ? o.getVolume() : 0);
 				out.setInTheMoney(o.getInTheMoney() ? "y": "n");
 				out.setIv(o.getImpliedVolatility());
-				out.setOpenInterest(o.getOpenInterest() != null ? o.getOpenInterest() : 0);
+				out.setOpenInterest((int) (o.getOpenInterest() != null ? o.getOpenInterest() : 0));
 				out.setBid(o.getBid());
 				out.setAsk(o.getAsk());
 				out.setDisplaySymbol(o.getContractSymbol());
@@ -81,7 +81,7 @@ public class YahooDataSource implements OptionsDataSource {
 				out.setVolume(o.getVolume() != null ? o.getVolume() : 0);
 				out.setInTheMoney(o.getInTheMoney() ? "y": "n");
 				out.setIv(o.getImpliedVolatility());
-				out.setOpenInterest(o.getOpenInterest() != null ? o.getOpenInterest() : 0);
+				out.setOpenInterest((int) (o.getOpenInterest() != null ? o.getOpenInterest() : 0));
 				out.setBid(o.getBid());
 				out.setAsk(o.getAsk());
 				out.setDisplaySymbol(o.getContractSymbol());
