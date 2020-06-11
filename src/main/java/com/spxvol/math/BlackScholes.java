@@ -6,7 +6,7 @@ import org.apache.commons.math3.special.Erf;
 
 public class BlackScholes {
 	private static final long N_MAX = 1000;
-	public static final double TOLERANCE = 1e-9;
+	private static final double TOLERANCE = 1e-9;
 
 	private double a = 1e-9;
 	private double b = 10 + TOLERANCE;
@@ -123,4 +123,5 @@ public class BlackScholes {
 		}
 
 	}
+	
 }
