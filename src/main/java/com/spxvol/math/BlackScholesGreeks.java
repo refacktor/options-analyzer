@@ -2,18 +2,10 @@ package com.spxvol.math;
 
 public class BlackScholesGreeks extends BlackScholes {
 
-	private double underlyingSpotPrice;
-	private double timeToExpiry;
-	private double strikePrice;
-	private double riskFreeRate;
 	
 	protected BlackScholesGreeks(Indicator optionType, double timeToExpiry,
 			double underlyingSpotPrice, double strikePrice, double riskFreeRate) {
-		super(0.0, optionType, timeToExpiry * 365, underlyingSpotPrice, strikePrice, riskFreeRate);
-		this.underlyingSpotPrice = underlyingSpotPrice;
-		this.timeToExpiry = timeToExpiry;
-		this.strikePrice =strikePrice;
-		this.riskFreeRate =riskFreeRate;
+		super(optionType, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
 	}
 	
 	public static OptionGreeks getOptionGreeks(Indicator optionType, double timeToExpiry,
@@ -38,7 +30,7 @@ public class BlackScholesGreeks extends BlackScholes {
 		double d1 = d1(volatility);
 		double d2 = d2(volatility);
 		double sd1 = standardNormalDistribution(d1);
-
+		
 		double thetaLeft = -(underlyingSpotPrice * sd1 * volatility) / (2 * Math.sqrt(timeToExpiry));
 		double thetaRight = getThetaRight(optionType, d2);
 
@@ -80,5 +72,4 @@ public class BlackScholesGreeks extends BlackScholes {
 		double bottom = Math.sqrt(2 * Math.PI);
 		return top / bottom;
 	}
-
 }

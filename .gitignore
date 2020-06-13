@@ -1,3 +1,4 @@
+.pydevproject
 HELP.md
 target/
 !**/src/main/**
