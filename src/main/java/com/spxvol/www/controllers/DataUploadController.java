@@ -18,12 +18,14 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.fasterxml.uuid.Generators;
 import com.spxvol.math.BlackScholes;
 import com.spxvol.math.BlackScholes.Indicator;
+import com.spxvol.math.BlackScholesGreeks;
+import com.spxvol.math.OptionGreeks;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.model.Constants;
+import com.spxvol.www.model.StandardQuote;
 import com.spxvol.www.services.DataUploadService;
 
 @Controller
@@ -33,7 +35,7 @@ public class DataUploadController {
 	
 	private final DataUploadService dataUploadService;
 
-	private final ObjectMapper mapper = JsonMapper.builder().addModule(new ParameterNamesModule()).addModule(new Jdk8Module())
+	public final ObjectMapper mapper = JsonMapper.builder().addModule(new ParameterNamesModule()).addModule(new Jdk8Module())
 			.addModule(new JavaTimeModule()).build();
 	
 	public DataUploadController(DataUploadService dataUploadService) {
@@ -41,8 +43,8 @@ public class DataUploadController {
 		this.dataUploadService = dataUploadService;
 	}
 
-	@PostMapping("/putData")
-	public ResponseEntity<String> uploadDataFromEtradeAPI(@RequestBody String json) throws Exception {
+	@PostMapping("/internal/upload")
+	public ResponseEntity<String> upload(@RequestBody String json) throws Exception {
 		final JsonNode rootNode = mapper.readTree(json);
 		String symbol = rootNode.get("stock").get("Product").get("symbol").asText();
 		final JsonNode all = rootNode.get("stock").get("All");
@@ -62,34 +64,32 @@ public class DataUploadController {
 					expirationNode.get("month").asInt(), expirationNode.get("day").asInt());
 		
 			optionChainResponseNode.withArray("OptionPair").elements().forEachRemaining(optionPairNode -> {
-				long uniquePair = Generators.timeBasedGenerator().generate().timestamp();
 				JsonNode[] optionPairNodes = { optionPairNode.get("Call"), optionPairNode.get("Put") };
 				for(JsonNode optionNode: optionPairNodes) {
 
-					OptionQuote build = mapper.convertValue(optionNode, OptionQuote.class);
-					build.setUniquePair(uniquePair);
-					build.setExpiration(expiration);
-				
+					OptionQuote build1 = this.mapper.convertValue(optionNode, OptionQuote.class);
+					build1.setExpiration(expiration);
+					
 					JsonNode greeks = optionNode.get("OptionGreeks");
-					build.setRho(greeks.get("rho").asDouble(0));
-					build.setVega(greeks.get("vega").asDouble(0));
-					build.setTheta(greeks.get("theta").asDouble(0));
-					build.setDelta(greeks.get("delta").asDouble(0));
-					build.setGamma(greeks.get("gamma").asDouble(0));
-					build.setIv(greeks.get("iv").asDouble(0));
-					build.setCurrentValue(greeks.get("currentValue").asBoolean());
-                     
-					if(build.getIv() < 0.0) {
-						build.setIv(0.0);
+					build1.setRho(greeks.get("rho").asDouble(0));
+					build1.setVega(greeks.get("vega").asDouble(0));
+					build1.setTheta(greeks.get("theta").asDouble(0));
+					build1.setDelta(greeks.get("delta").asDouble(0));
+					build1.setGamma(greeks.get("gamma").asDouble(0));
+					build1.setIv(greeks.get("iv").asDouble(0));
+					
+					if(build1.getIv() < 0.0) {
+						build1.setIv(0.0);
 					}
 					
-					final Indicator typeCode = Indicator.valueOf(build.getOptionType().substring(0,1));
+					final Indicator typeCode = Indicator.valueOf(build1.getOptionType().substring(0,1));
 					double timeToExpiry = expiration.toEpochDay() - underlying.getLastTrade()
 							.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
 					double riskFreeRate = 0.01;
 					
-					build.setBidIV(BlackScholes.reverse(build.getBid().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build.getStrikePrice().doubleValue(), riskFreeRate));
-					build.setAskIV(BlackScholes.reverse(build.getAsk().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build.getStrikePrice().doubleValue(), riskFreeRate));
+					build1.setBidIV(BlackScholes.reverse(build1.getBid().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build1.getStrikePrice().doubleValue(), riskFreeRate));
+					build1.setAskIV(BlackScholes.reverse(build1.getAsk().doubleValue(), typeCode, timeToExpiry, underlying.getPrice(), build1.getStrikePrice().doubleValue(), riskFreeRate));
+					OptionQuote build = build1;
 					
 					results.add(build);
 				}
@@ -97,6 +97,47 @@ public class DataUploadController {
 		});
 		final List<OptionQuote> quotes = results;
 		dataUploadService.saveAll(symbol, quotes);
+		long endTime = System.currentTimeMillis();
+		long runningTime = endTime - startTime;
+		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");
+		return new ResponseEntity<String>("data uploaded successfully for symbol " + symbol, HttpStatus.OK);
+	}
+
+	@PostMapping("/internal/uploadV2")
+	public ResponseEntity<String> upload(@RequestBody StandardQuote data) throws Exception {
+		String symbol = data.getUnderlying().getSymbol();
+		Underlying underlying = dataUploadService.underlying(symbol);
+		underlying.setLastTrade(data.getUnderlying().getLastTrade());
+		underlying.setPrice(data.getUnderlying().getPrice());
+		
+		System.out.println(" start uploading data for symbol " + symbol);
+		long startTime = System.currentTimeMillis();
+		List<OptionQuote> results = new ArrayList<>();
+		data.getOptions().forEach(option -> {
+			
+			final Indicator typeCode = Indicator.valueOf(option.getOptionType().substring(0,1));
+			double timeToExpiry = option.getExpiration().toEpochDay() - underlying.getLastTrade()
+					.atZone(Constants.MARKET_TIME_ZONE).toLocalDate().toEpochDay();
+			double riskFreeRate = 0.01;
+			
+			if(option.getBid() != null)
+				option.setBidIV(BlackScholes.reverse(option.getBid(), typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate));
+			
+			if(option.getAsk() != null)
+				option.setAskIV(BlackScholes.reverse(option.getAsk(), typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate));
+			
+			double midIV = BlackScholes.reverse((option.getAsk()+option.getBid())/2, typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate);
+			
+			OptionGreeks og = BlackScholesGreeks.getOptionGreeks(typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate, midIV);
+			option.setDelta(og.getDelta());
+			option.setRho(og.getRho());
+			option.setGamma(og.getGamma());
+			option.setTheta(og.getTheta());
+			option.setVega(og.getVega());
+			
+			results.add(option);
+		});
+		dataUploadService.saveAll(symbol, results);
 		long endTime = System.currentTimeMillis();
 		long runningTime = endTime - startTime;
 		System.out.println(runningTime + " millisecs (" + (runningTime / 1000.0) + ")secs");

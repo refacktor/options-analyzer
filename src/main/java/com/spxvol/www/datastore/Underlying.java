@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spxvol.www.model.Constants;
 
 @Entity
@@ -49,6 +50,7 @@ public class Underlying {
 		this.lastTrade = lastTrade;
 	}
 
+	@JsonIgnore
 	public ZonedDateTime getLastTradeTZ() {
 		return lastTrade.atZone(Constants.MARKET_TIME_ZONE);
 	}

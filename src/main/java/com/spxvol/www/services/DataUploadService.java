@@ -30,11 +30,11 @@ public class DataUploadService {
 	}
 
 	public void saveAll(String symbol, List<OptionQuote> quotes) {
-		optionQuoteRepository.deleteAll(optionQuoteRepository.findBySymbol(symbol));
+		optionQuoteRepository.deleteAll(optionQuoteRepository.findBySymbol(symbol.toUpperCase()));
 		Lists.partition(quotes, batchSize).parallelStream().forEach(optionQuoteRepository::saveAll);
 	}
 
 	public Underlying underlying(final String symbol) {
-		return underlyingRepository.findById(symbol).orElseGet(() -> underlyingRepository.save(new Underlying(symbol)));
+		return underlyingRepository.findById(symbol.toUpperCase()).orElseGet(() -> underlyingRepository.save(new Underlying(symbol.toUpperCase())));
 	}
 }

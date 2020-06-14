@@ -1,6 +1,5 @@
 package com.spxvol.www.datastore;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javax.persistence.Access;
@@ -19,29 +18,19 @@ public class OptionQuote {
 
 	@Id @SequenceGenerator(name = "optionPairSeqGen", sequenceName = "pairSeq", initialValue = 1, allocationSize = 20000) @GeneratedValue(generator = "optionPairSeqGen") private Long id;
 
-	@Version private Integer version;
-
-	private long uniquePair;
-
-	private String optionCategory;
-
-	private String optionRootSymbol;
-
 	private LocalDate expiration;
-
-	private boolean adjustedFlag;
 
 	private String displaySymbol;
 
 	private String optionType;
 
-	private BigDecimal strikePrice;
+	private Double strikePrice;
 
 	private String symbol;
 
-	private BigDecimal bid;
+	private Double bid;
 
-	private BigDecimal ask;
+	private Double ask;
 
 	private long bidSize;
 
@@ -53,11 +42,9 @@ public class OptionQuote {
 
 	private int openInterest;
 
-	private BigDecimal netChange;
+	private Double netChange;
 
-	private BigDecimal lastPrice;
-
-	private String quoteDetail;
+	private Double lastPrice;
 
 	private String osiKey;
 
@@ -73,8 +60,6 @@ public class OptionQuote {
 	private double gamma;
 
 	private double iv;
-
-	private boolean currentValue;
 
 	// Computed Values
 	private double bidIV;
@@ -92,32 +77,8 @@ public class OptionQuote {
 	public void setProbability(double computed) {
 	}
 
-	public long getUniquePair() {
-		return uniquePair;
-	}
-
-	public Integer getVersion() {
-		return version;
-	}
-
-	public void setVersion(Integer version) {
-		this.version = version;
-	}
-
-	public String getOptionCategory() {
-		return optionCategory;
-	}
-
-	public String getOptionRootSymbol() {
-		return optionRootSymbol;
-	}
-
 	public LocalDate getExpiration() {
 		return expiration;
-	}
-
-	public boolean isAdjustedFlag() {
-		return adjustedFlag;
 	}
 
 	public String getDisplaySymbol() {
@@ -128,7 +89,7 @@ public class OptionQuote {
 		return optionType;
 	}
 
-	public BigDecimal getStrikePrice() {
+	public Double getStrikePrice() {
 		return strikePrice;
 	}
 
@@ -136,11 +97,11 @@ public class OptionQuote {
 		return symbol;
 	}
 
-	public BigDecimal getBid() {
+	public Double getBid() {
 		return bid;
 	}
 
-	public BigDecimal getAsk() {
+	public Double getAsk() {
 		return ask;
 	}
 
@@ -164,16 +125,12 @@ public class OptionQuote {
 		return openInterest;
 	}
 
-	public BigDecimal getNetChange() {
+	public Double getNetChange() {
 		return netChange;
 	}
 
-	public BigDecimal getLastPrice() {
+	public Double getLastPrice() {
 		return lastPrice;
-	}
-
-	public String getQuoteDetail() {
-		return quoteDetail;
 	}
 
 	public String getOsiKey() {
@@ -188,24 +145,8 @@ public class OptionQuote {
 		this.id = id;
 	}
 
-	public void setUniquePair(long uniquePair) {
-		this.uniquePair = uniquePair;
-	}
-
-	public void setOptionCategory(String optionCategory) {
-		this.optionCategory = optionCategory;
-	}
-
-	public void setOptionRootSymbol(String optionRootSymbol) {
-		this.optionRootSymbol = optionRootSymbol;
-	}
-
 	public void setExpiration(LocalDate expiration) {
 		this.expiration = expiration;
-	}
-
-	public void setAdjustedFlag(boolean adjustedFlag) {
-		this.adjustedFlag = adjustedFlag;
 	}
 
 	public void setDisplaySymbol(String displaySymbol) {
@@ -216,7 +157,7 @@ public class OptionQuote {
 		this.optionType = optionType;
 	}
 
-	public void setStrikePrice(BigDecimal strikePrice) {
+	public void setStrikePrice(Double strikePrice) {
 		this.strikePrice = strikePrice;
 	}
 
@@ -224,11 +165,11 @@ public class OptionQuote {
 		this.symbol = symbol;
 	}
 
-	public void setBid(BigDecimal bid) {
+	public void setBid(Double bid) {
 		this.bid = bid;
 	}
 
-	public void setAsk(BigDecimal ask) {
+	public void setAsk(Double ask) {
 		this.ask = ask;
 	}
 
@@ -252,16 +193,12 @@ public class OptionQuote {
 		this.openInterest = openInterest;
 	}
 
-	public void setNetChange(BigDecimal netChange) {
+	public void setNetChange(Double netChange) {
 		this.netChange = netChange;
 	}
 
-	public void setLastPrice(BigDecimal lastPrice) {
+	public void setLastPrice(Double lastPrice) {
 		this.lastPrice = lastPrice;
-	}
-
-	public void setQuoteDetail(String quoteDetail) {
-		this.quoteDetail = quoteDetail;
 	}
 
 	public void setOsiKey(String osiKey) {
@@ -318,14 +255,6 @@ public class OptionQuote {
 
 	public void setIv(double iv) {
 		this.iv = iv;
-	}
-
-	public boolean isCurrentValue() {
-		return currentValue;
-	}
-
-	public void setCurrentValue(boolean currentValue) {
-		this.currentValue = currentValue;
 	}
 
 	public double getBidIV() {
