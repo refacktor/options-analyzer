@@ -72,7 +72,7 @@ public class YahooDataSource implements OptionsDataSource {
 				out.setSymbol(stock);
 				return out;
 			});
-			Stream<OptionQuote> putStream = in.getCalls().stream().map(o -> {
+			Stream<OptionQuote> putStream = in.getPuts().stream().map(o -> {
 				OptionQuote out = new OptionQuote();
 				out.setOptionType("PUT");
 				out.setExpiration(expirationDate);
