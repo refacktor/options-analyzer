@@ -2,7 +2,6 @@
 from __future__ import print_function
 import webbrowser
 import json
-import logging
 import configparser
 import sys
 import requests
@@ -44,5 +43,12 @@ config = configparser.ConfigParser()
 config.read(sys.argv[1])
 (session, base_url) = oauth()
 
-print(base_url)
-print(json.dumps(session))
+info_to_serialize = {
+    'consumer_key': session.consumer_key,
+    'consumer_secret': session.consumer_secret,
+    'access_token': session.access_token,
+    'access_token_secret': session.access_token_secret
+}
+
+with open('.etrade-oauth.json', 'w') as f:
+    json.dump(info_to_serialize, f)
