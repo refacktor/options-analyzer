@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.spxvol.jsonschema2pojo.yahoo.YahooSchema;
+import com.spxvol.jsonschema2pojo.yahoo.YahooOptionData;
 import com.spxvol.www.controllers.DataUploadController;
 import com.spxvol.www.model.StandardQuote;
 
@@ -36,8 +36,8 @@ class YahooDataSourceTest {
 	
 	@Test
 	void testConversion() throws JsonParseException, JsonMappingException, IOException {
-		YahooSchema ys = mapper.readValue(new File("src/main/resources/schemas/yahoo.sample.json"), 
-				YahooSchema.class);
+		YahooOptionData ys = mapper.readValue(new File("src/main/resources/yahoo-samples/option.data.json"), 
+				YahooOptionData.class);
 		StandardQuote quote = target.convert("SPX", ys);
 		Assertions.assertEquals("^SPX", ys.getOptionChain().getResult().get(0).getQuote().getSymbol());
 		Assertions.assertEquals("SPX", quote.getUnderlying().getSymbol()); 

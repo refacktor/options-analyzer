@@ -58,7 +58,7 @@ public class BlackScholesGreeksTest {
 		double iv = BlackScholes.reverse(optionPrice, Indicator.C, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate);
 		Assertions.assertEquals(4.27, iv, 0.01);
 		OptionGreeks optionGreeks = BlackScholesGreeks.getOptionGreeks(Indicator.C, timeToExpiry, underlyingSpotPrice, strikePrice, riskFreeRate, iv);
-		Assertions.assertEquals(0.438, optionGreeks.getDelta());
+		Assertions.assertEquals(0.468, optionGreeks.getDelta(), 0.001);
 	}
 	
 	@Test

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
-import com.spxvol.jsonschema2pojo.yahoo.Result;
-import com.spxvol.jsonschema2pojo.yahoo.YahooSchema;
+import com.spxvol.jsonschema2pojo.yahoo.YahooOptionData;
+import com.spxvol.jsonschema2pojo.yahoo.YahooResult;
 import com.spxvol.www.datastore.OptionQuote;
 import com.spxvol.www.datastore.Underlying;
 import com.spxvol.www.model.StandardQuote;
@@ -34,11 +34,11 @@ public class YahooDataSource implements OptionsDataSource {
 	@ResponseBody
 	public StandardQuote getQuote(@PathVariable("stock") String stock) {
 		final String yahooSymbol = stock.equals("SPX") ? "^" + stock : stock;
-		YahooSchema frontOption = rt.getForObject(url, YahooSchema.class, yahooSymbol);
+		YahooOptionData frontOption = rt.getForObject(url, YahooOptionData.class, yahooSymbol);
 		
 		final List<Long> expirationDates = frontOption.getOptionChain().getResult().get(0).getExpirationDates();
 		Stream<OptionQuote> backOptions = expirationDates.subList(1, expirationDates.size()).stream().flatMap(date -> {
-			YahooSchema backOption = rt.getForObject(url + "?date={date}", YahooSchema.class, yahooSymbol, date);
+			YahooOptionData backOption = rt.getForObject(url + "?date={date}", YahooOptionData.class, yahooSymbol, date);
 			return convert(stock, backOption).getOptions().stream();
 		});
 		final StandardQuote convert = convert(stock, frontOption);
@@ -46,9 +46,9 @@ public class YahooDataSource implements OptionsDataSource {
 		return convert;
 	}
 
-	protected StandardQuote convert(String stock, YahooSchema quote) {
+	protected StandardQuote convert(String stock, YahooOptionData quote) {
 		StandardQuote standardQuote = new StandardQuote();
-		final Result result = quote.getOptionChain().getResult().get(0);
+		final YahooResult result = quote.getOptionChain().getResult().get(0);
 		final Underlying underlying = new Underlying(stock);
 		underlying.setPrice(result.getQuote().getRegularMarketPrice());
 		underlying.setLastTrade(Instant.ofEpochSecond(result.getQuote().getRegularMarketTime()));

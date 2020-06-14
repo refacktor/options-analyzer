@@ -125,8 +125,10 @@ public class DataUploadController {
 			
 			if(option.getAsk() != null)
 				option.setAskIV(BlackScholes.reverse(option.getAsk(), typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate));
-			
-			double midIV = BlackScholes.reverse((option.getAsk()+option.getBid())/2, typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate);
+
+			double bid = option.getBid() == null ? 0 : option.getBid();
+			double ask = option.getAsk() == null ? 0 : option.getAsk();
+			double midIV = BlackScholes.reverse((bid+ask)/2, typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate);
 			
 			OptionGreeks og = BlackScholesGreeks.getOptionGreeks(typeCode, timeToExpiry, underlying.getPrice(), option.getStrikePrice(), riskFreeRate, midIV);
 			option.setDelta(og.getDelta());
